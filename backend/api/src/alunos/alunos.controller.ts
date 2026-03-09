@@ -1,4 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
+import { AlunosService } from './alunos.service';
 
 @Controller('alunos')
-export class AlunosController {}
+export class AlunosController {
+
+  constructor(private alunosService: AlunosService) {}
+
+  @Post()
+  criar(@Body() data: any) {
+    return this.alunosService.criarAluno(data);
+  }
+
+}
