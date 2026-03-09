@@ -1,0 +1,1 @@
+Esta pasta contém os croquis de tela do sistema.

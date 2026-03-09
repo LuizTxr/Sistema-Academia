@@ -1,0 +1,1 @@
+Esta pasta contém as Regras de Negócio do sistema.

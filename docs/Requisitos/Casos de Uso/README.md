@@ -1,0 +1,1 @@
+Esta pasta contém os casos de uso do sistema.
