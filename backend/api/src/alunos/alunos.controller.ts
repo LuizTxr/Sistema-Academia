@@ -4,7 +4,7 @@ import { AlunosService } from './alunos.service';
 @Controller('alunos')
 export class AlunosController {
 
-  constructor(private alunosService: AlunosService) {}
+  constructor(private readonly alunosService: AlunosService) {}
 
   @Post()
   criar(@Body() data: any) {
