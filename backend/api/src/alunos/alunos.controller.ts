@@ -1,5 +1,7 @@
-import { Controller, Post, Get, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Delete, Put } from '@nestjs/common';
 import { AlunosService } from './alunos.service';
+import { CreateAlunoDto } from './dto/create-aluno.dto';
+import { UpdateAlunoDto } from './dto/update-aluno.dto';
 
 @Controller('alunos')
 export class AlunosController {
@@ -7,7 +9,7 @@ export class AlunosController {
   constructor(private readonly alunosService: AlunosService) {}
 
   @Post()
-  criar(@Body() data: any) {
+  criar(@Body() data: CreateAlunoDto) {
     return this.alunosService.criarAluno(data);
   }
 
@@ -19,6 +21,11 @@ export class AlunosController {
   @Get(':id')
 buscarPorId(@Param('id') id: string) {
   return this.alunosService.buscarAlunoPorId(Number(id));
+}
+
+@Put(':id')
+atualizar(@Param('id') id: string, @Body() data: UpdateAlunoDto) {
+  return this.alunosService.atualizarAluno(Number(id), data);
 }
 
 @Delete(':id')

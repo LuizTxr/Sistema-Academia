@@ -29,6 +29,25 @@ async buscarAlunoPorId(id: number) {
   return aluno;
 }
 
+
+async atualizarAluno(id: number, data: any) {
+
+  const aluno = await this.prisma.aluno.findUnique({
+    where: { id }
+  });
+
+  if (!aluno) {
+    throw new NotFoundException('Aluno não encontrado');
+  }
+
+  return this.prisma.aluno.update({
+    where: { id },
+    data
+  });
+
+}
+
+
 async removerAluno(id: number) {
 
   const aluno = await this.prisma.aluno.findUnique({
