@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,5 +12,37 @@ export class AlunosService {
       data,
     });
   }
+
+  async listarAlunos() {
+  return this.prisma.aluno.findMany();
+}
+
+async buscarAlunoPorId(id: number) {
+  const aluno = await this.prisma.aluno.findUnique({
+    where: { id }
+  });
+
+  if (!aluno) {
+    throw new NotFoundException('Aluno não encontrado');
+  }
+
+  return aluno;
+}
+
+async removerAluno(id: number) {
+
+  const aluno = await this.prisma.aluno.findUnique({
+    where: { id }
+  });
+
+  if (!aluno) {
+    throw new NotFoundException('Aluno não encontrado');
+  }
+
+  return this.prisma.aluno.delete({
+    where: { id }
+  });
+
+}
 
 }
