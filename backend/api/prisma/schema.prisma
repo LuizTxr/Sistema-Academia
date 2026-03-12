@@ -10,71 +10,66 @@ model Aluno {
   id        Int      @id @default(autoincrement())
   nome      String
   email     String   @unique
-  telefone  String?
   createdAt DateTime @default(now())
-
-  treinos   Treino[]
 }
 
 model Professor {
-  id            Int      @id @default(autoincrement())
-  nome          String
-  email         String   @unique
-  especialidade String?
-  createdAt     DateTime @default(now())
+  id    Int    @id @default(autoincrement())
+  nome  String
+  email String @unique
 
-  treinos       Treino[]
+  treinos Treino[]
 }
 
 model Equipamento {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   nome      String
   tipo      String?
   descricao String?
 
-  exercicios Exercicio[]
+  exercicios ExercicioEquipamento[]
 }
 
 model Exercicio {
-  id            Int          @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   nome          String
   grupoMuscular String?
-  descricao     String?
 
-  equipamentoId Int?
-  equipamento   Equipamento? @relation(fields: [equipamentoId], references: [id])
+  equipamentos ExercicioEquipamento[]
+  treinos      TreinoExercicio[]
+}
 
-  treinoExercicios TreinoExercicio[]
+model ExercicioEquipamento {
+  exercicioId   Int
+  equipamentoId Int
+
+  exercicio   Exercicio   @relation(fields: [exercicioId], references: [id])
+  equipamento Equipamento @relation(fields: [equipamentoId], references: [id])
+
+  @@id([exercicioId, equipamentoId])
 }
 
 model Treino {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   nome        String
-  objetivo    String?
-  dataCriacao DateTime @default(now())
-
-  alunoId     Int
-  aluno       Aluno    @relation(fields: [alunoId], references: [id])
+  descricao   String?
 
   professorId Int
   professor   Professor @relation(fields: [professorId], references: [id])
 
-  exercicios  TreinoExercicio[]
+  exercicios TreinoExercicio[]
 }
 
 model TreinoExercicio {
-  id          Int @id @default(autoincrement())
-
   treinoId    Int
-  treino      Treino @relation(fields: [treinoId], references: [id])
-
   exercicioId Int
-  exercicio   Exercicio @relation(fields: [exercicioId], references: [id])
 
   series      Int?
   repeticoes  Int?
   carga       Float?
-  descanso    Int?
-  observacoes String?
-  ordem       Int?
+
+  treino    Treino    @relation(fields: [treinoId], references: [id])
+  exercicio Exercicio @relation(fields: [exercicioId], references: [id])
+
+  @@id([treinoId, exercicioId])
 }
