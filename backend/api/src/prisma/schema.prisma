@@ -9,13 +9,13 @@ model Aluno {
 }
 
 model Professor {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  email        String   @unique
+  id            Int      @id @default(autoincrement())
+  nome          String
+  email         String   @unique
   especialidade String?
-  createdAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
 
-  treinos      Treino[]
+  treinos       Treino[]
 }
 
 model Equipamento {
@@ -33,9 +33,7 @@ model Exercicio {
   grupoMuscular String?
   descricao     String?
 
-  equipamentoId Int?
-  equipamento   Equipamento? @relation(fields: [equipamentoId], references: [id])
-
+   equipamentos  Equipamento[]
   treinoExercicios TreinoExercicio[]
 }
 
