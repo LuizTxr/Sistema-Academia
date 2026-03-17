@@ -4,72 +4,63 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-}
+  }
 
 model Aluno {
   id        Int      @id @default(autoincrement())
   nome      String
   email     String   @unique
-  createdAt DateTime @default(now())
+  telefone  String?
+  treinos   Treino[]
 }
 
 model Professor {
-  id    Int    @id @default(autoincrement())
-  nome  String
-  email String @unique
-
-  treinos Treino[]
+  id            Int     @id @default(autoincrement())
+  nome          String
+  email         String  @unique
+  especialidade String?
+  treinos       Treino[]
 }
 
 model Equipamento {
-  id        Int     @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   nome      String
-  tipo      String?
-  descricao String?
-
-  exercicios ExercicioEquipamento[]
+  tipo      String
+  exercicios Exercicio[]
 }
 
 model Exercicio {
-  id            Int     @id @default(autoincrement())
-  nome          String
-  grupoMuscular String?
-
-  equipamentos ExercicioEquipamento[]
-  treinos      TreinoExercicio[]
-}
-
-model ExercicioEquipamento {
-  exercicioId   Int
-  equipamentoId Int
-
-  exercicio   Exercicio   @relation(fields: [exercicioId], references: [id])
-  equipamento Equipamento @relation(fields: [equipamentoId], references: [id])
-
-  @@id([exercicioId, equipamentoId])
+  id             Int          @id @default(autoincrement())
+  nome           String
+  grupoMuscular  String
+  equipamentoId  Int
+  equipamento    Equipamento  @relation(fields: [equipamentoId], references: [id])
+  treinos        TreinoExercicio[]
 }
 
 model Treino {
-  id          Int    @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   nome        String
-  descricao   String?
-
+  objetivo    String
+  alunoId     Int
   professorId Int
-  professor   Professor @relation(fields: [professorId], references: [id])
 
-  exercicios TreinoExercicio[]
+  aluno       Aluno     @relation(fields: [alunoId], references: [id])
+  professor   Professor @relation(fields: [professorId], references: [id])
+  exercicios  TreinoExercicio[]
 }
 
 model TreinoExercicio {
-  treinoId    Int
-  exercicioId Int
+  id           Int      @id @default(autoincrement())
+  treinoId     Int
+  exercicioId  Int
+  series       Int
+  repeticoes   Int
+  carga        Float?
+  descanso     Int?
+  observacao   String?
+  ordem        Int?
 
-  series      Int?
-  repeticoes  Int?
-  carga       Float?
-
-  treino    Treino    @relation(fields: [treinoId], references: [id])
-  exercicio Exercicio @relation(fields: [exercicioId], references: [id])
-
-  @@id([treinoId, exercicioId])
+  treino       Treino   @relation(fields: [treinoId], references: [id])
+  exercicio    Exercicio @relation(fields: [exercicioId], references: [id])
 }
