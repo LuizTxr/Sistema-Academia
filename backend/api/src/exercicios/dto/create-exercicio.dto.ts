@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsInt } from 'class-validator';
 
 export class CreateExercicioDto {
 
@@ -16,5 +16,12 @@ export class CreateExercicioDto {
     })
     @IsString()
     grupoMuscular: string;
+
+    @ApiProperty({
+        example: 1,
+        description: 'ID do equipamento utilizado'
+    })
+    @IsInt()
+    equipamentoId: number;
 
 }
