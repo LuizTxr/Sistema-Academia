@@ -12,13 +12,11 @@ export class ExerciciosService {
     }
 
     create(data: CreateExercicioDto) {
-        return this.prisma.exercicio.create({
+        return (this.prisma.exercicio as any).create({
             data: {
                 nome: data.nome,
                 grupoMuscular: data.grupoMuscular,
-                equipamento: {
-                    connect: { id: data.equipamentoId }
-                }
+                equipamentoId: data.equipamentoId,
             }
         });
     }

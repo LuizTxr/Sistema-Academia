@@ -11,7 +11,7 @@ import {
 import type { StudentSession } from '../../../types/auth'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { WeekDayTabs } from '../components/WeekDayTabs'
-import { mockWorkoutDays } from '../services/mock-workout'
+import { fetchWorkoutDays } from '../services/workout-api'
 import type { WorkoutDraftByDay, WorkoutSavedStateByDay } from '../types/workout'
 
 type WorkoutPageProps = {
@@ -21,15 +21,25 @@ type WorkoutPageProps = {
 const dayIdByWeekDay = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
 
 function getInitialSelectedDayId() {
-  const todayDayId = dayIdByWeekDay[new Date().getDay()]
-  const todayIndex = mockWorkoutDays.findIndex((day) => day.id === todayDayId)
+  return dayIdByWeekDay[new Date().getDay()]
+}
 
-  if (todayIndex >= 0 && mockWorkoutDays[todayIndex]?.active) {
-    return mockWorkoutDays[todayIndex].id
+function resolveSelectedDayId(days: WorkoutPageDay[], currentSelectedDayId: string) {
+  const currentDay = days.find((day) => day.id === currentSelectedDayId)
+
+  if (currentDay?.active) {
+    return currentDay.id
+  }
+
+  const todayDayId = getInitialSelectedDayId()
+  const todayIndex = days.findIndex((day) => day.id === todayDayId)
+
+  if (todayIndex >= 0 && days[todayIndex]?.active) {
+    return days[todayIndex].id
   }
 
   if (todayIndex >= 0) {
-    const nextActiveDay = mockWorkoutDays
+    const nextActiveDay = days
       .slice(todayIndex + 1)
       .find((day) => day.active)
 
@@ -38,24 +48,45 @@ function getInitialSelectedDayId() {
     }
   }
 
-  return mockWorkoutDays.find((day) => day.active)?.id ?? mockWorkoutDays[0].id
+  return days.find((day) => day.active)?.id ?? days[0]?.id ?? currentSelectedDayId
+}
+
+type WorkoutPageDay = {
+  id: string
+  label: string
+  active: boolean
+  title: string
+  exercises: {
+    id: string
+    name: string
+    notes?: string
+    sets: {
+      id: string
+      label: string
+      reps: string
+    }[]
+  }[]
 }
 
 export function WorkoutPage({ session }: WorkoutPageProps) {
   const [selectedDayId, setSelectedDayId] = useState(getInitialSelectedDayId)
+  const [workoutDays, setWorkoutDays] = useState<WorkoutPageDay[]>([])
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
     null,
   )
   const [draftByDay, setDraftByDay] = useState<WorkoutDraftByDay>(
-    () => getWorkoutDraftByDay() ?? {},
+    () => getWorkoutDraftByDay(session.enrollmentCode) ?? {},
   )
   const [savedStateByDay, setSavedStateByDay] = useState<WorkoutSavedStateByDay>(
-    () => getWorkoutSavedStateByDay() ?? {},
+    () => getWorkoutSavedStateByDay(session.enrollmentCode) ?? {},
   )
   const [savedAt, setSavedAt] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const selectedDay =
-    mockWorkoutDays.find((day) => day.id === selectedDayId) ?? mockWorkoutDays[0]
+    workoutDays.find((day) => day.id === selectedDayId) ?? workoutDays[0]
+  const selectedExercises = selectedDay?.exercises ?? []
   const selectedDraft = draftByDay[selectedDayId] ?? {
     completedSetIds: [],
     completedExerciseIds: [],
@@ -67,8 +98,8 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   const completedExerciseIds = new Set(selectedDraft.completedExerciseIds)
   const completedSetIds = new Set(selectedDraft.completedSetIds)
   const isWorkoutCompleted =
-    selectedDay.exercises.length > 0 &&
-    selectedDay.exercises.every((exercise) => {
+    selectedExercises.length > 0 &&
+    selectedExercises.every((exercise) => {
       const hasAllSetsCompleted = exercise.sets.every((set) =>
         completedSetIds.has(set.id),
       )
@@ -80,7 +111,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
 
   function handleLogout() {
     clearStudentSession()
-    clearWorkoutProgressStorage()
+    clearWorkoutProgressStorage(session.enrollmentCode)
     window.location.reload()
   }
 
@@ -114,6 +145,10 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleToggleSet(exerciseId: string, setId: string) {
+    if (!selectedDay) {
+      return
+    }
+
     const exercise = selectedDay.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
@@ -161,6 +196,10 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleCompleteExercise(exerciseId: string) {
+    if (!selectedDay) {
+      return
+    }
+
     const exercise = selectedDay.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
@@ -189,7 +228,10 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
         },
       }
 
-      persistWorkoutSavedStateByDay(nextSavedStateByDay)
+      persistWorkoutSavedStateByDay(
+        session.enrollmentCode,
+        nextSavedStateByDay,
+      )
       return nextSavedStateByDay
     })
     setSavedAt(new Date().toLocaleTimeString('pt-BR', {
@@ -199,12 +241,52 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   useEffect(() => {
-    persistWorkoutDraftByDay(draftByDay)
-  }, [draftByDay])
+    let cancelled = false
+
+    async function loadWorkoutDays() {
+      setIsLoading(true)
+      setErrorMessage(null)
+
+      try {
+        const days = await fetchWorkoutDays(session.enrollmentCode)
+
+        if (cancelled) {
+          return
+        }
+
+        setWorkoutDays(days)
+        setSelectedDayId((currentSelectedDayId) =>
+          resolveSelectedDayId(days, currentSelectedDayId),
+        )
+      } catch (error) {
+        if (!cancelled) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : 'Nao foi possivel carregar os treinos.',
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadWorkoutDays()
+
+    return () => {
+      cancelled = true
+    }
+  }, [session.enrollmentCode])
 
   useEffect(() => {
-    persistWorkoutSavedStateByDay(savedStateByDay)
-  }, [savedStateByDay])
+    persistWorkoutDraftByDay(session.enrollmentCode, draftByDay)
+  }, [draftByDay, session.enrollmentCode])
+
+  useEffect(() => {
+    persistWorkoutSavedStateByDay(session.enrollmentCode, savedStateByDay)
+  }, [savedStateByDay, session.enrollmentCode])
 
   return (
     <MobilePage
@@ -225,53 +307,69 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
           Confira seus treinos abaixo.
         </p>
 
-        <WeekDayTabs
-          days={mockWorkoutDays}
-          selectedDayId={selectedDayId}
-          onSelectDay={handleSelectDay}
-        />
+        {isLoading ? (
+          <p className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]">
+            Carregando treino...
+          </p>
+        ) : errorMessage ? (
+          <p className="rounded-[var(--radius-card)] bg-[color:rgba(185,74,72,0.12)] px-4 py-4 text-sm text-[var(--color-danger)]">
+            {errorMessage}
+          </p>
+        ) : selectedDay ? (
+          <>
+            <WeekDayTabs
+              days={workoutDays}
+              selectedDayId={selectedDayId}
+              onSelectDay={handleSelectDay}
+            />
 
-        <section className="grid gap-4">
-          <header className="grid gap-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
-              {selectedDay.label}
-            </p>
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">
-                {selectedDay.title}
-              </h2>
-              {isWorkoutCompleted && (
-                <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-accent-strong)]">
-                  Treino concluido
-                </span>
-              )}
-            </div>
-          </header>
+            <section className="grid gap-4">
+              <header className="grid gap-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                  {selectedDay.label}
+                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">
+                    {selectedDay.title}
+                  </h2>
+                  {isWorkoutCompleted && (
+                    <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-accent-strong)]">
+                      Treino concluido
+                    </span>
+                  )}
+                </div>
+              </header>
 
-          <div className="grid gap-3">
-            {selectedDay.exercises.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                expanded={expandedExerciseId === exercise.id}
-                completed={
-                  completedExerciseIds.has(exercise.id) ||
-                  exercise.sets.every((set) => completedSetIds.has(set.id))
-                }
-                completedSetIds={exercise.sets
-                  .filter((set) => completedSetIds.has(set.id))
-                  .map((set) => set.id)}
-                onToggle={() =>
-                  setExpandedExerciseId((currentExerciseId) =>
-                    currentExerciseId === exercise.id ? null : exercise.id,
-                  )
-                }
-                onToggleSet={(setId) => handleToggleSet(exercise.id, setId)}
-                onCompleteExercise={() => handleCompleteExercise(exercise.id)}
-              />
-            ))}
-          </div>
-        </section>
+              <div className="grid gap-3">
+                {selectedDay.exercises.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    expanded={expandedExerciseId === exercise.id}
+                    completed={
+                      completedExerciseIds.has(exercise.id) ||
+                      exercise.sets.every((set) => completedSetIds.has(set.id))
+                    }
+                    completedSetIds={exercise.sets
+                      .filter((set) => completedSetIds.has(set.id))
+                      .map((set) => set.id)}
+                    onToggle={() =>
+                      setExpandedExerciseId((currentExerciseId) =>
+                        currentExerciseId === exercise.id ? null : exercise.id,
+                      )
+                    }
+                    onToggleSet={(setId) => handleToggleSet(exercise.id, setId)}
+                    onCompleteExercise={() => handleCompleteExercise(exercise.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        ) : (
+          <p className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]">
+            Nenhum treino encontrado para este aluno.
+          </p>
+        )}
 
         {savedAt && (
           <p className="text-center text-sm text-[var(--color-text-muted)]">
@@ -279,7 +377,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
           </p>
         )}
 
-        {hasPendingChanges && (
+        {selectedDay && hasPendingChanges && (
           <button
             type="button"
             onClick={handleSaveProgress}

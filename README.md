@@ -6,17 +6,17 @@ Sistema de gestao de treinos com foco em experiencia mobile first para alunos de
 
 O projeto esta organizado para separar frontend, backend e futuras extensoes mobile.
 
-Hoje, o frontend web ja possui um MVP navegavel para demonstracao do fluxo principal do aluno:
+Hoje, o frontend web ja possui um MVP navegavel do fluxo principal do aluno integrado ao backend NestJS:
 
 - login por matricula
-- sessao local no dispositivo
+- sessao local no dispositivo vinculada a matricula
 - selecao automatica do treino pelo dia atual
-- visualizacao dos treinos por dia da semana
+- visualizacao dos treinos por dia da semana por aluno
 - expansao de exercicios
 - conclusao sequencial de series
 - conclusao de exercicio
-- rascunho local persistido no navegador
-- salvamento local de progresso
+- rascunho local persistido no navegador por aluno
+- salvamento local de progresso por aluno
 
 ## Estrutura do Projeto
 
@@ -42,7 +42,7 @@ Sistema-Academia/
 
 ## Frontend
 
-O frontend fica em [`web`](C:\GIT\Sistema-Academia\web) e segue estas diretrizes:
+O frontend fica em [`web`](C:\Academia-Sistema\web) e segue estas diretrizes:
 
 - React com Vite
 - TypeScript
@@ -65,6 +65,11 @@ O fluxo demonstravel atual e:
 8. conclui exercicios
 9. salva o progresso localmente
 
+### Endpoints usados pelo frontend
+
+- `POST /auth/aluno/login`
+- `GET /alunos/:matricula/treinos`
+
 ### Rodando o frontend
 
 ```powershell
@@ -82,7 +87,7 @@ npm run build
 
 ## Backend
 
-O backend atual fica em [`backend/api`](C:\GIT\Sistema-Academia\backend\api).
+O backend atual fica em [`backend/api`](C:\Academia-Sistema\backend\api).
 
 Para instalar as dependencias do backend:
 
@@ -93,6 +98,6 @@ npm install
 
 ## Observacoes
 
-- o frontend atual ainda utiliza dados locais para demonstracao
-- a integracao completa com a API NestJS ainda e um proximo passo
-- o projeto ja esta em um ponto adequado para apresentar o fluxo principal do produto
+- o fluxo do aluno ja consome a API NestJS para identificacao por matricula e carga dos treinos
+- a autenticacao forte com Keycloak continua como proximo passo do plano
+- o progresso do treino continua local ao navegador e separado por matricula

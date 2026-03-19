@@ -7,11 +7,12 @@ datasource db {
 }
 
 model Aluno {
-  id       Int      @id @default(autoincrement())
-  nome     String
-  email    String   @unique
-  telefone String?
-  treinos  Treino[]
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  matricula String   @unique
+  telefone  String?
+  treinos   Treino[]
 }
 
 model Professor {
@@ -41,6 +42,7 @@ model Exercicio {
 model Treino {
   id          Int               @id @default(autoincrement())
   nome        String
+  diaSemana   String
   professorId Int
   alunoId     Int
   objetivo    String

@@ -10,4 +10,8 @@ export class UpdateAlunoDto {
   @IsOptional()
   email?: string;
 
+  @IsString()
+  @IsOptional()
+  matricula?: string;
+
 }

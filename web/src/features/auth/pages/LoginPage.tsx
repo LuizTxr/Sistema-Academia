@@ -2,11 +2,12 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
 import { persistStudentSession } from '../../../services/storage/session-storage'
-import { mockStudents } from '../services/mock-students'
+import { loginStudent } from '../services/auth-api'
 
 export function LoginPage() {
   const [enrollmentCode, setEnrollmentCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleEnrollmentChange(value: string) {
     setEnrollmentCode(value.replace(/\D/g, ''))
@@ -16,7 +17,7 @@ export function LoginPage() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const normalizedCode = enrollmentCode.trim()
@@ -26,17 +27,19 @@ export function LoginPage() {
       return
     }
 
-    const student = mockStudents.find(
-      (studentItem) => studentItem.enrollmentCode === normalizedCode,
-    )
+    setIsSubmitting(true)
 
-    if (!student) {
-      setErrorMessage('Matricula nao encontrada.')
-      return
+    try {
+      const student = await loginStudent(normalizedCode)
+      persistStudentSession(student)
+      window.location.reload()
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Nao foi possivel entrar.',
+      )
+    } finally {
+      setIsSubmitting(false)
     }
-
-    persistStudentSession(student)
-    window.location.reload()
   }
 
   return (
@@ -66,6 +69,7 @@ export function LoginPage() {
               type="text"
               inputMode="numeric"
               autoComplete="off"
+              disabled={isSubmitting}
               value={enrollmentCode}
               onChange={(event) => handleEnrollmentChange(event.target.value)}
               placeholder="000000"
@@ -81,9 +85,10 @@ export function LoginPage() {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="flex h-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-accent-strong)] px-4 text-sm font-semibold text-white transition active:scale-[0.99]"
           >
-            Entrar
+            {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>

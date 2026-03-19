@@ -9,4 +9,8 @@ export class CreateAlunoDto {
   @IsEmail()
   email: string;
 
+  @IsString()
+  @IsNotEmpty()
+  matricula: string;
+
 }
