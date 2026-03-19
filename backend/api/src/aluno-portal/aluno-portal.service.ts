@@ -1,54 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { AlunosService } from '../alunos/alunos.service';
+import { TreinosService } from '../treinos/treinos.service';
 
 @Injectable()
 export class AlunoPortalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly alunosService: AlunosService,
+    private readonly treinosService: TreinosService,
+  ) {}
 
   async login(matricula: string) {
-    const aluno = await (this.prisma.aluno as any).findUnique({
-      where: { matricula },
-      include: {
-        treinos: {
-          orderBy: [{ diaSemana: 'asc' }, { id: 'asc' }],
-          take: 1,
-        },
-      },
-    });
-
-    if (!aluno) {
-      throw new NotFoundException('Matricula nao encontrada');
-    }
+    const aluno = await this.alunosService.buscarAlunoPorMatricula(matricula);
+    const treinos = await this.treinosService.listar({ alunoId: aluno.id });
 
     return {
       enrollmentCode: aluno.matricula,
       studentName: aluno.nome,
-      studentGoal: aluno.treinos[0]?.objetivo ?? 'Treino personalizado',
+      studentGoal: treinos[0]?.objetivo ?? 'Treino personalizado',
     };
   }
 
   async listWorkoutDays(matricula: string) {
-    const aluno = await (this.prisma.aluno as any).findUnique({
-      where: { matricula },
-      include: {
-        treinos: {
-          include: {
-            exercicios: {
-              include: {
-                exercicio: true,
-              },
-              orderBy: {
-                ordem: 'asc',
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!aluno) {
-      throw new NotFoundException('Aluno nao encontrado');
-    }
+    const aluno = await this.alunosService.buscarAlunoPorMatricula(matricula);
+    const treinos = await this.treinosService.listar({ alunoId: aluno.id });
 
     const orderedWeekDays = [
       { id: 'seg', label: 'Seg' },
@@ -61,7 +35,7 @@ export class AlunoPortalService {
     ];
 
     const treinoPorDia = new Map<string, any>(
-      aluno.treinos.map((treino) => [treino.diaSemana, treino]),
+      treinos.map((treino) => [treino.diaSemana, treino]),
     );
 
     return orderedWeekDays.map((weekDay) => {

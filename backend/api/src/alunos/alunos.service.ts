@@ -29,6 +29,18 @@ async buscarAlunoPorId(id: number) {
   return aluno;
 }
 
+async buscarAlunoPorMatricula(matricula: string) {
+  const aluno = await this.prisma.aluno.findUnique({
+    where: { matricula }
+  });
+
+  if (!aluno) {
+    throw new NotFoundException('Aluno nÃ£o encontrado');
+  }
+
+  return aluno;
+}
+
 
 async atualizarAluno(id: number, data: any) {
 

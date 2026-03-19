@@ -96,6 +96,19 @@ cd backend/api
 npm install
 ```
 
+### Autenticacao transitoria do backend
+
+Os endpoints protegidos usam, por enquanto, estes headers:
+
+- `x-user-role`
+- `x-user-id`
+
+Documentacao operacional:
+
+- [API_BACKEND.md](C:\Academia-Sistema\docs\API_BACKEND.md)
+- Swagger local: `http://localhost:3000/api`
+- Postman: [backend-api.collection.json](C:\Academia-Sistema\postman\collections\backend-api.collection.json)
+
 ## Observacoes
 
 - o fluxo do aluno ja consome a API NestJS para identificacao por matricula e carga dos treinos
