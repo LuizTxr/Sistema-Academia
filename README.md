@@ -1,6 +1,6 @@
 # Sistema-Academia
 
-Sistema de gestao de treinos com foco em experiencia mobile first para alunos de academia.
+NoTreino - Sistema de gestao de treinos com foco em experiencia mobile first para alunos de academia.
 
 ## Visao Geral
 
