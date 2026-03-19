@@ -1,6 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
-import { clearStudentSession } from '../../../services/storage/session-storage'
+import {
+  clearStudentSession,
+  clearWorkoutProgressStorage,
+  getWorkoutDraftByDay,
+  getWorkoutSavedStateByDay,
+  persistWorkoutDraftByDay,
+  persistWorkoutSavedStateByDay,
+} from '../../../services/storage/session-storage'
 import type { StudentSession } from '../../../types/auth'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { WeekDayTabs } from '../components/WeekDayTabs'
@@ -16,9 +23,11 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
     null,
   )
-  const [draftByDay, setDraftByDay] = useState<WorkoutDraftByDay>({})
+  const [draftByDay, setDraftByDay] = useState<WorkoutDraftByDay>(
+    () => getWorkoutDraftByDay() ?? {},
+  )
   const [savedStateByDay, setSavedStateByDay] = useState<WorkoutSavedStateByDay>(
-    {},
+    () => getWorkoutSavedStateByDay() ?? {},
   )
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
@@ -48,6 +57,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
 
   function handleLogout() {
     clearStudentSession()
+    clearWorkoutProgressStorage()
     window.location.reload()
   }
 
@@ -132,18 +142,31 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleSaveProgress() {
-    setSavedStateByDay((currentSavedStateByDay) => ({
-      ...currentSavedStateByDay,
-      [selectedDayId]: {
-        completedSetIds: [...selectedDraft.completedSetIds],
-        completedExerciseIds: [...selectedDraft.completedExerciseIds],
-      },
-    }))
+    setSavedStateByDay((currentSavedStateByDay) => {
+      const nextSavedStateByDay = {
+        ...currentSavedStateByDay,
+        [selectedDayId]: {
+          completedSetIds: [...selectedDraft.completedSetIds],
+          completedExerciseIds: [...selectedDraft.completedExerciseIds],
+        },
+      }
+
+      persistWorkoutSavedStateByDay(nextSavedStateByDay)
+      return nextSavedStateByDay
+    })
     setSavedAt(new Date().toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
     }))
   }
+
+  useEffect(() => {
+    persistWorkoutDraftByDay(draftByDay)
+  }, [draftByDay])
+
+  useEffect(() => {
+    persistWorkoutSavedStateByDay(savedStateByDay)
+  }, [savedStateByDay])
 
   return (
     <MobilePage title={session.studentName} subtitle={session.studentGoal}>
