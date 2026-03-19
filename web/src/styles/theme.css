@@ -1,0 +1,40 @@
+:root {
+  --color-canvas: #f4f7f6;
+  --color-surface: #fcfefd;
+  --color-border-soft: #d8e2de;
+  --color-text-strong: #18312a;
+  --color-text-base: #345247;
+  --color-text-muted: #6a847a;
+  --color-accent-strong: #1f7a5c;
+  --color-accent-soft: #def3eb;
+  --color-danger: #b94a48;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 18px 40px -24px rgba(24, 49, 42, 0.25);
+
+  --font-sans: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-2xl: 1.5rem;
+
+  --leading-tight: 1.2;
+  --leading-base: 1.5;
+  --leading-relaxed: 1.65;
+
+  --tracking-tight: -0.03em;
+}
