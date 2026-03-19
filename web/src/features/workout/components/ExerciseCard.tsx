@@ -3,16 +3,31 @@ import type { WorkoutExercise } from '../types/workout'
 type ExerciseCardProps = {
   exercise: WorkoutExercise
   expanded: boolean
+  completed: boolean
+  completedSetIds: string[]
   onToggle: () => void
+  onToggleSet: (setId: string) => void
+  onCompleteExercise: () => void
 }
 
 export function ExerciseCard({
   exercise,
   expanded,
+  completed,
+  completedSetIds,
   onToggle,
+  onToggleSet,
+  onCompleteExercise,
 }: ExerciseCardProps) {
   return (
-    <article className="rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white">
+    <article
+      className={[
+        'rounded-[var(--radius-card)] border bg-white transition',
+        completed
+          ? 'border-[var(--color-accent-strong)]'
+          : 'border-[var(--color-border-soft)]',
+      ].join(' ')}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -23,7 +38,9 @@ export function ExerciseCard({
             {exercise.name}
           </h3>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            {exercise.sets.length} series
+            {completed
+              ? 'Exercicio concluido'
+              : `${completedSetIds.length}/${exercise.sets.length} series concluidas`}
           </p>
         </div>
         <span className="text-lg text-[var(--color-text-muted)]">
@@ -39,19 +56,36 @@ export function ExerciseCard({
             </p>
           )}
 
+          {!completed && (
+            <button
+              type="button"
+              onClick={onCompleteExercise}
+              className="mb-4 flex h-11 items-center justify-center rounded-[var(--radius-card)] border border-[var(--color-accent-strong)] px-4 text-sm font-semibold text-[var(--color-accent-strong)]"
+            >
+              Concluir exercicio
+            </button>
+          )}
+
           <div className="grid gap-2">
             {exercise.sets.map((set) => (
-              <div
+              <button
                 key={set.id}
-                className="flex items-center justify-between rounded-[calc(var(--radius-card)-0.25rem)] bg-[var(--color-canvas)] px-3 py-3"
+                type="button"
+                onClick={() => onToggleSet(set.id)}
+                className={[
+                  'flex items-center justify-between rounded-[calc(var(--radius-card)-0.25rem)] px-3 py-3 text-left transition',
+                  completedSetIds.includes(set.id)
+                    ? 'bg-[var(--color-accent-soft)]'
+                    : 'bg-[var(--color-canvas)]',
+                ].join(' ')}
               >
                 <span className="text-sm font-medium text-[var(--color-text-strong)]">
                   {set.label}
                 </span>
                 <span className="text-sm text-[var(--color-text-base)]">
-                  {set.reps}
+                  {completedSetIds.includes(set.id) ? 'Concluida' : set.reps}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

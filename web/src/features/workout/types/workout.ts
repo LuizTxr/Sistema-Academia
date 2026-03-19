@@ -18,3 +18,19 @@ export type WorkoutDay = {
   title: string
   exercises: WorkoutExercise[]
 }
+
+export type WorkoutDraftByDay = Record<
+  string,
+  {
+    completedSetIds: string[]
+    completedExerciseIds: string[]
+  }
+>
+
+export type WorkoutSavedStateByDay = Record<
+  string,
+  {
+    completedSetIds: string[]
+    completedExerciseIds: string[]
+  }
+>
