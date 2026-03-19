@@ -25,10 +25,10 @@ export function WeekDayTabs({
             className={[
               'h-11 rounded-[var(--radius-card)] border text-sm font-semibold transition',
               isSelected
-                ? 'border-[var(--color-accent-strong)] bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]'
-                : 'border-[var(--color-border-soft)] bg-white text-[var(--color-text-strong)]',
+                ? 'border-[var(--color-accent-strong)] bg-[var(--color-accent-strong)] text-white shadow-[var(--shadow-card)]'
+                : 'border-[var(--color-border-soft)] bg-white text-[var(--color-text-strong)] shadow-[0_8px_18px_-16px_rgba(24,49,42,0.35)]',
               !day.active
-                ? 'cursor-not-allowed border-transparent bg-[var(--color-canvas)] text-[var(--color-text-muted)]'
+                ? 'cursor-not-allowed border-dashed border-[var(--color-border-soft)] bg-transparent text-[var(--color-text-muted)] opacity-60 shadow-none'
                 : '',
             ].join(' ')}
           >

@@ -19,6 +19,10 @@ export function ExerciseCard({
   onToggleSet,
   onCompleteExercise,
 }: ExerciseCardProps) {
+  const lastCompletedIndex = exercise.sets.reduce((highestIndex, set, index) => {
+    return completedSetIds.includes(set.id) ? index : highestIndex
+  }, -1)
+
   return (
     <article
       className={[
@@ -56,38 +60,53 @@ export function ExerciseCard({
             </p>
           )}
 
+          <div className="grid gap-2">
+            {exercise.sets.map((set, index) => {
+              const isCompleted = completedSetIds.includes(set.id)
+              const isNextAvailable = index === lastCompletedIndex + 1
+              const isLastCompleted = index === lastCompletedIndex
+              const canToggle = isCompleted ? isLastCompleted : isNextAvailable
+
+              return (
+                <button
+                  key={set.id}
+                  type="button"
+                  disabled={!canToggle}
+                  onClick={() => onToggleSet(set.id)}
+                  className={[
+                    'flex items-center justify-between rounded-[calc(var(--radius-card)-0.25rem)] border px-3 py-3 text-left transition',
+                    isCompleted
+                      ? 'border-[var(--color-accent-strong)] bg-[var(--color-accent-soft)]'
+                      : 'border-transparent bg-[var(--color-canvas)]',
+                    !canToggle
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'shadow-[0_8px_18px_-16px_rgba(24,49,42,0.35)]',
+                  ].join(' ')}
+                >
+                  <span className="text-sm font-medium text-[var(--color-text-strong)]">
+                    {set.label}
+                  </span>
+                  <span className="text-sm text-[var(--color-text-base)]">
+                    {isCompleted
+                      ? 'Concluida'
+                      : canToggle
+                        ? set.reps
+                        : `${set.reps} · Aguardando anterior`}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
           {!completed && (
             <button
               type="button"
               onClick={onCompleteExercise}
-              className="mb-4 flex h-11 items-center justify-center rounded-[var(--radius-card)] border border-[var(--color-accent-strong)] px-4 text-sm font-semibold text-[var(--color-accent-strong)]"
+              className="mt-4 mx-auto flex h-11 w-full max-w-56 items-center justify-center rounded-[var(--radius-card)] border border-[var(--color-accent-strong)] px-4 text-sm font-semibold text-[var(--color-accent-strong)]"
             >
               Concluir exercicio
             </button>
           )}
-
-          <div className="grid gap-2">
-            {exercise.sets.map((set) => (
-              <button
-                key={set.id}
-                type="button"
-                onClick={() => onToggleSet(set.id)}
-                className={[
-                  'flex items-center justify-between rounded-[calc(var(--radius-card)-0.25rem)] px-3 py-3 text-left transition',
-                  completedSetIds.includes(set.id)
-                    ? 'bg-[var(--color-accent-soft)]'
-                    : 'bg-[var(--color-canvas)]',
-                ].join(' ')}
-              >
-                <span className="text-sm font-medium text-[var(--color-text-strong)]">
-                  {set.label}
-                </span>
-                <span className="text-sm text-[var(--color-text-base)]">
-                  {completedSetIds.includes(set.id) ? 'Concluida' : set.reps}
-                </span>
-              </button>
-            ))}
-          </div>
         </div>
       )}
     </article>

@@ -18,8 +18,31 @@ type WorkoutPageProps = {
   session: StudentSession
 }
 
+const dayIdByWeekDay = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
+
+function getInitialSelectedDayId() {
+  const todayDayId = dayIdByWeekDay[new Date().getDay()]
+  const todayIndex = mockWorkoutDays.findIndex((day) => day.id === todayDayId)
+
+  if (todayIndex >= 0 && mockWorkoutDays[todayIndex]?.active) {
+    return mockWorkoutDays[todayIndex].id
+  }
+
+  if (todayIndex >= 0) {
+    const nextActiveDay = mockWorkoutDays
+      .slice(todayIndex + 1)
+      .find((day) => day.active)
+
+    if (nextActiveDay) {
+      return nextActiveDay.id
+    }
+  }
+
+  return mockWorkoutDays.find((day) => day.active)?.id ?? mockWorkoutDays[0].id
+}
+
 export function WorkoutPage({ session }: WorkoutPageProps) {
-  const [selectedDayId, setSelectedDayId] = useState('seg')
+  const [selectedDayId, setSelectedDayId] = useState(getInitialSelectedDayId)
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
     null,
   )
@@ -100,7 +123,22 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
     }
 
     updateDayDraft((draft) => {
+      const exerciseCompletedSetIds = exercise.sets
+        .filter((set) => draft.completedSetIds.includes(set.id))
+        .map((set) => set.id)
+      const targetSetIndex = exercise.sets.findIndex((set) => set.id === setId)
+      const lastCompletedIndex = exercise.sets.reduce((highestIndex, set, index) => {
+        return exerciseCompletedSetIds.includes(set.id) ? index : highestIndex
+      }, -1)
       const isCompleted = draft.completedSetIds.includes(setId)
+      const canToggle = isCompleted
+        ? targetSetIndex === lastCompletedIndex
+        : targetSetIndex === lastCompletedIndex + 1
+
+      if (!canToggle) {
+        return draft
+      }
+
       const nextCompletedSetIds = isCompleted
         ? draft.completedSetIds.filter((completedSetId) => completedSetId !== setId)
         : [...draft.completedSetIds, setId]
@@ -169,20 +207,24 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }, [savedStateByDay])
 
   return (
-    <MobilePage title={session.studentName} subtitle={session.studentGoal}>
+    <MobilePage
+      title={session.studentName}
+      subtitle={session.studentGoal}
+      headerAction={
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="shrink-0 rounded-[var(--radius-pill)] border border-[var(--color-border-soft)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]"
+        >
+          Sair
+        </button>
+      }
+    >
       <div className="grid gap-5">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm leading-6 text-[var(--color-text-base)]">
-            Seu treino atual ficara disponivel aqui apos a integracao com a
-            API.
+            Confira seus treinos diarios abaixo.
           </p>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="shrink-0 rounded-[var(--radius-pill)] border border-[var(--color-border-soft)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]"
-          >
-            Sair
-          </button>
         </div>
 
         <WeekDayTabs
