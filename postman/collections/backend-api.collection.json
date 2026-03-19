@@ -2,150 +2,333 @@
   "info": {
     "name": "Sistema Academia Backend",
     "_postman_id": "1c1c4b6e-32bc-4f77-90bd-3b0a4e4c9f21",
-    "description": "Colecao minima da API backend com autenticacao transitoria por headers.",
+    "description": "Colecao operacional da API backend com autenticacao transitoria por headers e contratos estabilizados.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Aluno Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"matricula\": \"1001\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/auth/aluno/login",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "auth",
-            "aluno",
-            "login"
-          ]
-        }
-      }
-    },
-    {
-      "name": "Aluno Treinos",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{base_url}}/alunos/1001/treinos",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "alunos",
-            "1001",
-            "treinos"
-          ]
-        }
-      }
-    },
-    {
-      "name": "Professor Listar Treinos",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "x-user-role",
-            "value": "professor"
-          },
-          {
-            "key": "x-user-id",
-            "value": "1"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/treinos?professorId=1",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "treinos"
-          ],
-          "query": [
-            {
-              "key": "professorId",
-              "value": "1"
+      "name": "Aluno Portal",
+      "item": [
+        {
+          "name": "Aluno Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matricula\": \"1001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/aluno/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "aluno",
+                "login"
+              ]
             }
-          ]
+          }
+        },
+        {
+          "name": "Aluno Treinos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/alunos/1001/treinos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alunos",
+                "1001",
+                "treinos"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Professor Criar Treino",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "x-user-role",
-            "value": "professor"
-          },
-          {
-            "key": "x-user-id",
-            "value": "1"
+      "name": "Treinos Protegidos",
+      "item": [
+        {
+          "name": "Professor Listar Treinos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-user-role",
+                "value": "professor"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/treinos?professorId=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "treinos"
+              ],
+              "query": [
+                {
+                  "key": "professorId",
+                  "value": "1"
+                }
+              ]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nome\": \"Treino Novo\",\n  \"diaSemana\": \"sex\",\n  \"professorId\": 1,\n  \"alunoId\": 2,\n  \"objetivo\": \"Hipertrofia\"\n}"
         },
-        "url": {
-          "raw": "{{base_url}}/treinos",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "treinos"
-          ]
+        {
+          "name": "Professor Criar Treino",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-role",
+                "value": "professor"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Treino Novo\",\n  \"diaSemana\": \"sex\",\n  \"professorId\": 1,\n  \"alunoId\": 2,\n  \"objetivo\": \"Hipertrofia\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/treinos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "treinos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Professor Atualizar Treino",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-role",
+                "value": "professor"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Treino Atualizado\",\n  \"objetivo\": \"Resistencia\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/treinos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "treinos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Professor Criar Item Treino",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-role",
+                "value": "professor"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"treinoId\": 1,\n  \"exercicioId\": 1,\n  \"series\": 3,\n  \"repeticoes\": 12,\n  \"carga\": 20,\n  \"descanso\": 60,\n  \"ordem\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/treino-exercicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "treino-exercicios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Professor Atualizar Item Treino",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-role",
+                "value": "professor"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"series\": 4,\n  \"repeticoes\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/treino-exercicios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "treino-exercicios",
+                "1"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Professor Criar Item Treino",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "x-user-role",
-            "value": "professor"
-          },
-          {
-            "key": "x-user-id",
-            "value": "1"
+      "name": "Cadastros Base",
+      "item": [
+        {
+          "name": "Criar Aluno",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Aluno Teste\",\n  \"email\": \"aluno.teste@academia.com\",\n  \"matricula\": \"3003\",\n  \"telefone\": \"11999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/alunos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alunos"
+              ]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"treinoId\": 1,\n  \"exercicioId\": 1,\n  \"series\": 3,\n  \"repeticoes\": 12,\n  \"carga\": 20,\n  \"descanso\": 60,\n  \"ordem\": 1\n}"
         },
-        "url": {
-          "raw": "{{base_url}}/treino-exercicios",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "treino-exercicios"
-          ]
+        {
+          "name": "Criar Professor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Professor Teste\",\n  \"email\": \"prof.teste@academia.com\",\n  \"especialidade\": \"Musculacao\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/professores",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "professores"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar Equipamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Banco de supino\",\n  \"tipo\": \"Livre\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/equipamentos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "equipamentos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar Exercicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Supino reto\",\n  \"grupoMuscular\": \"Peito\",\n  \"equipamentoId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/exercicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "exercicios"
+              ]
+            }
+          }
         }
-      }
+      ]
     }
   ],
   "variable": [

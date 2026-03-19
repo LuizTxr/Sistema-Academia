@@ -109,6 +109,18 @@ Documentacao operacional:
 - Swagger local: `http://localhost:3000/api`
 - Postman: [backend-api.collection.json](C:\Academia-Sistema\postman\collections\backend-api.collection.json)
 
+### Modulos backend estabilizados
+
+Os contratos abaixo ja estao consolidados para consumo dos demais colaboradores:
+
+- `alunos`
+- `professores`
+- `treinos`
+- `treino-exercicios`
+- `equipamentos`
+- `exercicios`
+- `aluno-portal` como fachada transitória do frontend do aluno
+
 ## Observacoes
 
 - o fluxo do aluno ja consome a API NestJS para identificacao por matricula e carga dos treinos
