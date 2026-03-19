@@ -1,25 +1,32 @@
+import { useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
 import { clearStudentSession } from '../../../services/storage/session-storage'
 import type { StudentSession } from '../../../types/auth'
+import { ExerciseCard } from '../components/ExerciseCard'
+import { WeekDayTabs } from '../components/WeekDayTabs'
+import { mockWorkoutDays } from '../services/mock-workout'
 
 type WorkoutPageProps = {
   session: StudentSession
 }
 
-const weekDays = [
-  { label: 'Seg', active: true },
-  { label: 'Ter', active: true },
-  { label: 'Qua', active: true },
-  { label: 'Qui', active: false },
-  { label: 'Sex', active: true },
-  { label: 'Sab', active: false },
-  { label: 'Dom', active: false },
-]
-
 export function WorkoutPage({ session }: WorkoutPageProps) {
+  const [selectedDayId, setSelectedDayId] = useState('seg')
+  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
+    null,
+  )
+
+  const selectedDay =
+    mockWorkoutDays.find((day) => day.id === selectedDayId) ?? mockWorkoutDays[0]
+
   function handleLogout() {
     clearStudentSession()
     window.location.reload()
+  }
+
+  function handleSelectDay(dayId: string) {
+    setSelectedDayId(dayId)
+    setExpandedExerciseId(null)
   }
 
   return (
@@ -39,18 +46,37 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
-          {weekDays.map((day) => (
-            <button
-              key={day.label}
-              type="button"
-              disabled={!day.active}
-              className="h-11 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white text-sm font-semibold text-[var(--color-text-strong)] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-[var(--color-canvas)] disabled:text-[var(--color-text-muted)]"
-            >
-              {day.label}
-            </button>
-          ))}
-        </div>
+        <WeekDayTabs
+          days={mockWorkoutDays}
+          selectedDayId={selectedDayId}
+          onSelectDay={handleSelectDay}
+        />
+
+        <section className="grid gap-4">
+          <header className="grid gap-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+              {selectedDay.label}
+            </p>
+            <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">
+              {selectedDay.title}
+            </h2>
+          </header>
+
+          <div className="grid gap-3">
+            {selectedDay.exercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                expanded={expandedExerciseId === exercise.id}
+                onToggle={() =>
+                  setExpandedExerciseId((currentExerciseId) =>
+                    currentExerciseId === exercise.id ? null : exercise.id,
+                  )
+                }
+              />
+            ))}
+          </div>
+        </section>
 
         <div className="rounded-[var(--radius-card)] bg-[var(--color-canvas)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
