@@ -221,11 +221,9 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
       }
     >
       <div className="grid gap-5">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm leading-6 text-[var(--color-text-base)]">
-            Confira seus treinos diarios abaixo.
-          </p>
-        </div>
+        <p className="text-sm leading-5 text-[var(--color-text-base)]">
+          Confira seus treinos abaixo.
+        </p>
 
         <WeekDayTabs
           days={mockWorkoutDays}

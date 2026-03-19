@@ -41,14 +41,21 @@ export function LoginPage() {
 
   return (
     <MobilePage>
-      <div className="flex min-h-[calc(100svh-7rem)] flex-col justify-center gap-8">
+      <div className="relative flex min-h-[calc(100svh-7rem)] flex-col justify-center gap-8">
+        <p className="absolute top-0 left-0 right-0 text-center text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          Sistema Academia
+        </p>
+
         <header className="grid gap-2 text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <p className="sr-only">
             Sistema Academia
           </p>
           <h1 className="text-3xl font-semibold tracking-[var(--tracking-tight)] text-[var(--color-text-strong)]">
             Login
           </h1>
+          <p className="mx-auto text-sm leading-5 text-[var(--color-text-base)]">
+            Entre com sua matricula.
+          </p>
         </header>
 
         <form className="grid gap-4" onSubmit={handleSubmit}>
@@ -61,8 +68,8 @@ export function LoginPage() {
               autoComplete="off"
               value={enrollmentCode}
               onChange={(event) => handleEnrollmentChange(event.target.value)}
-              placeholder="Entre com a Matricula"
-              className="h-12 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-soft)]"
+              placeholder="000000"
+              className="h-12 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-center text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-soft)]"
             />
           </label>
 
