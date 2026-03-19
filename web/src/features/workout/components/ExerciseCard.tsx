@@ -37,17 +37,17 @@ export function ExerciseCard({
         onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
       >
-        <div>
-          <h3 className="text-base font-semibold text-[var(--color-text-strong)]">
+        <div className="min-w-0">
+          <h3 className="truncate text-base font-semibold text-[var(--color-text-strong)]">
             {exercise.name}
           </h3>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 text-sm leading-5 text-[var(--color-text-muted)]">
             {completed
               ? 'Exercicio concluido'
               : `${completedSetIds.length}/${exercise.sets.length} series concluidas`}
           </p>
         </div>
-        <span className="text-lg text-[var(--color-text-muted)]">
+        <span className="shrink-0 text-lg text-[var(--color-text-muted)]">
           {expanded ? '−' : '+'}
         </span>
       </button>
@@ -74,7 +74,7 @@ export function ExerciseCard({
                   disabled={!canToggle}
                   onClick={() => onToggleSet(set.id)}
                   className={[
-                    'flex items-center justify-between rounded-[calc(var(--radius-card)-0.25rem)] border px-3 py-3 text-left transition',
+                    'flex flex-col items-start gap-1 rounded-[calc(var(--radius-card)-0.25rem)] border px-3 py-3 text-left transition sm:flex-row sm:items-center sm:justify-between',
                     isCompleted
                       ? 'border-[var(--color-accent-strong)] bg-[var(--color-accent-soft)]'
                       : 'border-transparent bg-[var(--color-canvas)]',
@@ -86,7 +86,7 @@ export function ExerciseCard({
                   <span className="text-sm font-medium text-[var(--color-text-strong)]">
                     {set.label}
                   </span>
-                  <span className="text-sm text-[var(--color-text-base)]">
+                  <span className="text-sm leading-5 text-[var(--color-text-base)] sm:text-right">
                     {isCompleted
                       ? 'Concluida'
                       : canToggle
