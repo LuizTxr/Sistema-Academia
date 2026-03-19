@@ -1,79 +1,60 @@
-import { NotFoundException } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateAlunoDto } from './dto/create-aluno.dto';
+import { UpdateAlunoDto } from './dto/update-aluno.dto';
 
 @Injectable()
 export class AlunosService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private prisma: PrismaService) {}
-
-  async criarAluno(data: any) {
+  criar(data: CreateAlunoDto) {
     return this.prisma.aluno.create({
       data,
     });
   }
 
-  async listarAlunos() {
-  return this.prisma.aluno.findMany();
-}
-
-async buscarAlunoPorId(id: number) {
-  const aluno = await this.prisma.aluno.findUnique({
-    where: { id }
-  });
-
-  if (!aluno) {
-    throw new NotFoundException('Aluno não encontrado');
+  listar() {
+    return this.prisma.aluno.findMany();
   }
 
-  return aluno;
-}
+  async buscarPorId(id: number) {
+    const aluno = await this.prisma.aluno.findUnique({
+      where: { id },
+    });
 
-async buscarAlunoPorMatricula(matricula: string) {
-  const aluno = await this.prisma.aluno.findUnique({
-    where: { matricula }
-  });
+    if (!aluno) {
+      throw new NotFoundException('Aluno nao encontrado');
+    }
 
-  if (!aluno) {
-    throw new NotFoundException('Aluno nÃ£o encontrado');
+    return aluno;
   }
 
-  return aluno;
-}
+  async buscarAlunoPorMatricula(matricula: string) {
+    const aluno = await this.prisma.aluno.findUnique({
+      where: { matricula },
+    });
 
+    if (!aluno) {
+      throw new NotFoundException('Aluno nao encontrado');
+    }
 
-async atualizarAluno(id: number, data: any) {
-
-  const aluno = await this.prisma.aluno.findUnique({
-    where: { id }
-  });
-
-  if (!aluno) {
-    throw new NotFoundException('Aluno não encontrado');
+    return aluno;
   }
 
-  return this.prisma.aluno.update({
-    where: { id },
-    data
-  });
+  async atualizar(id: number, data: UpdateAlunoDto) {
+    await this.buscarPorId(id);
 
-}
-
-
-async removerAluno(id: number) {
-
-  const aluno = await this.prisma.aluno.findUnique({
-    where: { id }
-  });
-
-  if (!aluno) {
-    throw new NotFoundException('Aluno não encontrado');
+    return this.prisma.aluno.update({
+      where: { id },
+      data,
+    });
   }
 
-  return this.prisma.aluno.delete({
-    where: { id }
-  });
+  async remover(id: number) {
+    await this.buscarPorId(id);
 
-}
-
+    return this.prisma.aluno.delete({
+      where: { id },
+    });
+  }
 }

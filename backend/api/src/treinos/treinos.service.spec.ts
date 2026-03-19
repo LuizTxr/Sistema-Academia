@@ -6,12 +6,16 @@ import { TreinosService } from './treinos.service';
 describe('TreinosService', () => {
   let service: TreinosService;
   let prisma: {
+    $transaction: jest.Mock;
     treino: {
       findMany: jest.Mock;
       findUnique: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
+    };
+    treinoExercicio: {
+      deleteMany: jest.Mock;
     };
     aluno: {
       findUnique: jest.Mock;
@@ -23,12 +27,16 @@ describe('TreinosService', () => {
 
   beforeEach(async () => {
     prisma = {
+      $transaction: jest.fn(),
       treino: {
         findMany: jest.fn(),
         findUnique: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+      },
+      treinoExercicio: {
+        deleteMany: jest.fn(),
       },
       aluno: {
         findUnique: jest.fn(),
@@ -112,5 +120,38 @@ describe('TreinosService', () => {
         { nome: 'Novo nome' },
       ),
     ).rejects.toThrow(ForbiddenException);
+  });
+
+  it('removes treino and its itens in a transaction', async () => {
+    prisma.treino.findUnique.mockResolvedValue({
+      id: 5,
+      alunoId: 2,
+      professorId: 1,
+      nome: 'Treino A',
+      diaSemana: 'seg',
+      objetivo: 'Hipertrofia',
+      aluno: null,
+      professor: null,
+      exercicios: [],
+    });
+    prisma.treinoExercicio.deleteMany.mockResolvedValue({ count: 2 });
+    prisma.treino.delete.mockResolvedValue({ id: 5 });
+    prisma.$transaction.mockImplementation(async (callback) =>
+      callback({
+        treinoExercicio: prisma.treinoExercicio,
+        treino: prisma.treino,
+      }),
+    );
+
+    const result = await service.remover(5);
+
+    expect(prisma.$transaction).toHaveBeenCalled();
+    expect(prisma.treinoExercicio.deleteMany).toHaveBeenCalledWith({
+      where: { treinoId: 5 },
+    });
+    expect(prisma.treino.delete).toHaveBeenCalledWith({
+      where: { id: 5 },
+    });
+    expect(result).toEqual({ id: 5 });
   });
 });

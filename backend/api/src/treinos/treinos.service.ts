@@ -172,8 +172,14 @@ export class TreinosService {
   async remover(id: number) {
     await this.buscarPorId(id);
 
-    return this.prisma.treino.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      await tx.treinoExercicio.deleteMany({
+        where: { treinoId: id },
+      });
+
+      return tx.treino.delete({
+        where: { id },
+      });
     });
   }
 

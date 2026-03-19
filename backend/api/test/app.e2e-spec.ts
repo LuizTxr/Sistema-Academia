@@ -238,6 +238,37 @@ describe('API (e2e)', () => {
     );
   });
 
+  it('GET /treinos lista treinos do professor autenticado', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/treinos')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(200);
+
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0]).toMatchObject({
+      id: fixtures.treinos.lucas.id,
+      professorId: fixtures.professores.joao.id,
+      alunoId: fixtures.alunos.lucas.id,
+      nome: 'Treino A',
+    });
+  });
+
+  it('GET /treinos lista treinos do proprio aluno autenticado', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/treinos')
+      .set('x-user-role', 'aluno')
+      .set('x-user-id', String(fixtures.alunos.lucas.id))
+      .expect(200);
+
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0]).toMatchObject({
+      id: fixtures.treinos.lucas.id,
+      alunoId: fixtures.alunos.lucas.id,
+      nome: 'Treino A',
+    });
+  });
+
   it('GET /treinos/:id bloqueia professor ao consultar treino de outro professor', async () => {
     const response = await request(app.getHttpServer())
       .get(`/treinos/${fixtures.treinos.marina.id}`)
@@ -248,6 +279,30 @@ describe('API (e2e)', () => {
     expect(response.body.message).toBe(
       'Professor so pode consultar treinos vinculados a si mesmo',
     );
+  });
+
+  it('GET /treinos/:id permite que aluno consulte o proprio treino', async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/treinos/${fixtures.treinos.lucas.id}`)
+      .set('x-user-role', 'aluno')
+      .set('x-user-id', String(fixtures.alunos.lucas.id))
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: fixtures.treinos.lucas.id,
+      alunoId: fixtures.alunos.lucas.id,
+      professorId: fixtures.professores.joao.id,
+    });
+  });
+
+  it('GET /treinos/:id retorna 404 para treino inexistente', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/treinos/999999')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(404);
+
+    expect(response.body.message).toBe('Treino nao encontrado');
   });
 
   it('POST /treinos permite criar treino apenas para o professor autenticado', async () => {
@@ -267,6 +322,80 @@ describe('API (e2e)', () => {
     expect(response.body.message).toBe(
       'Professor so pode criar treino proprio',
     );
+  });
+
+  it('POST /treinos cria treino para o professor autenticado', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/treinos')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        nome: 'Treino C',
+        diaSemana: 'sex',
+        objetivo: 'Forca',
+        alunoId: fixtures.alunos.lucas.id,
+        professorId: fixtures.professores.joao.id,
+      })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      nome: 'Treino C',
+      diaSemana: 'sex',
+      objetivo: 'Forca',
+      alunoId: fixtures.alunos.lucas.id,
+      professorId: fixtures.professores.joao.id,
+    });
+  });
+
+  it('POST /treinos retorna 400 para payload invalido', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/treinos')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        nome: '',
+        diaSemana: 'sex',
+        objetivo: 'Forca',
+        alunoId: fixtures.alunos.lucas.id,
+        professorId: fixtures.professores.joao.id,
+      })
+      .expect(400);
+
+    expect(response.body.message).toEqual(
+      expect.arrayContaining(['nome should not be empty']),
+    );
+  });
+
+  it('PUT /treinos/:id atualiza treino do professor autenticado', async () => {
+    const response = await request(app.getHttpServer())
+      .put(`/treinos/${fixtures.treinos.lucas.id}`)
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        nome: 'Treino A Atualizado',
+        objetivo: 'Resistencia',
+      })
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: fixtures.treinos.lucas.id,
+      nome: 'Treino A Atualizado',
+      objetivo: 'Resistencia',
+    });
+  });
+
+  it('DELETE /treinos/:id remove treino do professor autenticado', async () => {
+    await request(app.getHttpServer())
+      .delete(`/treinos/${fixtures.treinos.lucas.id}`)
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .get(`/treinos/${fixtures.treinos.lucas.id}`)
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(404);
   });
 
   it('POST /treino-exercicios bloqueia professor ao alterar treino de outro professor', async () => {
@@ -289,6 +418,65 @@ describe('API (e2e)', () => {
     );
   });
 
+  it('POST /treino-exercicios cria item de treino para professor dono', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/treino-exercicios')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        treinoId: fixtures.treinos.lucas.id,
+        exercicioId: fixtures.exercicios.supino.id,
+        series: 4,
+        repeticoes: 10,
+        descanso: 75,
+        ordem: 2,
+      })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      treinoId: fixtures.treinos.lucas.id,
+      exercicioId: fixtures.exercicios.supino.id,
+      series: 4,
+      repeticoes: 10,
+      descanso: 75,
+      ordem: 2,
+    });
+  });
+
+  it('POST /treino-exercicios retorna 404 para treino inexistente', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/treino-exercicios')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        treinoId: 999999,
+        exercicioId: fixtures.exercicios.supino.id,
+        series: 4,
+        repeticoes: 10,
+      })
+      .expect(404);
+
+    expect(response.body.message).toBe('Treino nao encontrado');
+  });
+
+  it('POST /treino-exercicios retorna 400 para payload invalido', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/treino-exercicios')
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .send({
+        treinoId: fixtures.treinos.lucas.id,
+        exercicioId: fixtures.exercicios.supino.id,
+        series: 0,
+        repeticoes: 10,
+      })
+      .expect(400);
+
+    expect(response.body.message).toEqual(
+      expect.arrayContaining(['series must not be less than 1']),
+    );
+  });
+
   it('PATCH /treino-exercicios/:id permite professor dono atualizar o proprio item', async () => {
     const response = await request(app.getHttpServer())
       .patch(`/treino-exercicios/${fixtures.treinoExercicios.lucas.id}`)
@@ -305,5 +493,21 @@ describe('API (e2e)', () => {
       series: 5,
       repeticoes: 8,
     });
+  });
+
+  it('DELETE /treino-exercicios/:id remove item do professor dono', async () => {
+    await request(app.getHttpServer())
+      .delete(`/treino-exercicios/${fixtures.treinoExercicios.lucas.id}`)
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(200);
+
+    const treinoResponse = await request(app.getHttpServer())
+      .get(`/treinos/${fixtures.treinos.lucas.id}`)
+      .set('x-user-role', 'professor')
+      .set('x-user-id', String(fixtures.professores.joao.id))
+      .expect(200);
+
+    expect(treinoResponse.body.exercicios).toEqual([]);
   });
 });
