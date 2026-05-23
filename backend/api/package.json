@@ -23,7 +23,7 @@
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio",
-    "dev": "npm run db:up && npm run db:migrate && npm run start:dev"
+    "dev": "npm run db:up && npm run db:migrate && npx prisma db seed && npm run start:dev"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -84,6 +84,6 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   }
 }
