@@ -8,11 +8,11 @@ import {
   persistWorkoutDraftByDay,
   persistWorkoutSavedStateByDay,
 } from '../../../services/storage/session-storage'
+import { apiClient } from '../../../services/api/client'
 import type { StudentSession } from '../../../types/auth'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { WeekDayTabs } from '../components/WeekDayTabs'
-import { mockWorkoutDays } from '../services/mock-workout'
-import type { WorkoutDraftByDay, WorkoutSavedStateByDay } from '../types/workout'
+import type { WorkoutDay, WorkoutDraftByDay, WorkoutSavedStateByDay } from '../types/workout'
 
 type WorkoutPageProps = {
   session: StudentSession
@@ -20,32 +20,27 @@ type WorkoutPageProps = {
 
 const dayIdByWeekDay = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
 
-function getInitialSelectedDayId() {
+function getInitialSelectedDayId(days: WorkoutDay[]) {
   const todayDayId = dayIdByWeekDay[new Date().getDay()]
-  const todayIndex = mockWorkoutDays.findIndex((day) => day.id === todayDayId)
+  const todayIndex = days.findIndex((day) => day.id === todayDayId)
 
-  if (todayIndex >= 0 && mockWorkoutDays[todayIndex]?.active) {
-    return mockWorkoutDays[todayIndex].id
+  if (todayIndex >= 0 && days[todayIndex]?.active) {
+    return days[todayIndex].id
   }
 
   if (todayIndex >= 0) {
-    const nextActiveDay = mockWorkoutDays
-      .slice(todayIndex + 1)
-      .find((day) => day.active)
-
-    if (nextActiveDay) {
-      return nextActiveDay.id
-    }
+    const nextActiveDay = days.slice(todayIndex + 1).find((day) => day.active)
+    if (nextActiveDay) return nextActiveDay.id
   }
 
-  return mockWorkoutDays.find((day) => day.active)?.id ?? mockWorkoutDays[0].id
+  return days.find((day) => day.active)?.id ?? days[0].id
 }
 
 export function WorkoutPage({ session }: WorkoutPageProps) {
-  const [selectedDayId, setSelectedDayId] = useState(getInitialSelectedDayId)
-  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
-    null,
-  )
+  const [workoutDays, setWorkoutDays] = useState<WorkoutDay[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDayId, setSelectedDayId] = useState<string>('')
+  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null)
   const [draftByDay, setDraftByDay] = useState<WorkoutDraftByDay>(
     () => getWorkoutDraftByDay() ?? {},
   )
@@ -54,8 +49,15 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   )
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
-  const selectedDay =
-    mockWorkoutDays.find((day) => day.id === selectedDayId) ?? mockWorkoutDays[0]
+  useEffect(() => {
+    apiClient.buscarTreinos(session.id).then((dias) => {
+      setWorkoutDays(dias)
+      setSelectedDayId(getInitialSelectedDayId(dias))
+      setIsLoading(false)
+    })
+  }, [session.id])
+
+  const selectedDay = workoutDays.find((day) => day.id === selectedDayId) ?? workoutDays[0]
   const selectedDraft = draftByDay[selectedDayId] ?? {
     completedSetIds: [],
     completedExerciseIds: [],
@@ -67,12 +69,12 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   const completedExerciseIds = new Set(selectedDraft.completedExerciseIds)
   const completedSetIds = new Set(selectedDraft.completedSetIds)
   const isWorkoutCompleted =
+    !!selectedDay &&
     selectedDay.exercises.length > 0 &&
     selectedDay.exercises.every((exercise) => {
       const hasAllSetsCompleted = exercise.sets.every((set) =>
         completedSetIds.has(set.id),
       )
-
       return hasAllSetsCompleted || completedExerciseIds.has(exercise.id)
     })
   const hasPendingChanges =
@@ -104,7 +106,6 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
         completedSetIds: [],
         completedExerciseIds: [],
       }
-
       return {
         ...currentDraftByDay,
         [selectedDayId]: updater(currentDraft),
@@ -114,13 +115,11 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleToggleSet(exerciseId: string, setId: string) {
-    const exercise = selectedDay.exercises.find(
+    const exercise = selectedDay?.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
 
-    if (!exercise) {
-      return
-    }
+    if (!exercise) return
 
     updateDayDraft((draft) => {
       const exerciseCompletedSetIds = exercise.sets
@@ -135,9 +134,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
         ? targetSetIndex === lastCompletedIndex
         : targetSetIndex === lastCompletedIndex + 1
 
-      if (!canToggle) {
-        return draft
-      }
+      if (!canToggle) return draft
 
       const nextCompletedSetIds = isCompleted
         ? draft.completedSetIds.filter((completedSetId) => completedSetId !== setId)
@@ -161,13 +158,11 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleCompleteExercise(exerciseId: string) {
-    const exercise = selectedDay.exercises.find(
+    const exercise = selectedDay?.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
 
-    if (!exercise) {
-      return
-    }
+    if (!exercise) return
 
     updateDayDraft((draft) => ({
       completedSetIds: Array.from(
@@ -188,7 +183,6 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
           completedExerciseIds: [...selectedDraft.completedExerciseIds],
         },
       }
-
       persistWorkoutSavedStateByDay(nextSavedStateByDay)
       return nextSavedStateByDay
     })
@@ -206,10 +200,17 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
     persistWorkoutSavedStateByDay(savedStateByDay)
   }, [savedStateByDay])
 
+  if (isLoading) {
+    return (
+      <MobilePage title={session.studentName}>
+        <p className="text-sm text-[var(--color-text-muted)]">Carregando treinos...</p>
+      </MobilePage>
+    )
+  }
+
   return (
     <MobilePage
       title={session.studentName}
-      subtitle={undefined}
       headerAction={
         <button
           type="button"
@@ -226,7 +227,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
         </p>
 
         <WeekDayTabs
-          days={mockWorkoutDays}
+          days={workoutDays}
           selectedDayId={selectedDayId}
           onSelectDay={handleSelectDay}
         />
@@ -234,11 +235,11 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
         <section className="grid gap-4">
           <header className="grid gap-1">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
-              {selectedDay.label}
+              {selectedDay?.label}
             </p>
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">
-                {selectedDay.title}
+                {selectedDay?.title}
               </h2>
               {isWorkoutCompleted && (
                 <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-accent-strong)]">
@@ -249,7 +250,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
           </header>
 
           <div className="grid gap-3">
-            {selectedDay.exercises.map((exercise) => (
+            {selectedDay?.exercises.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}
                 exercise={exercise}

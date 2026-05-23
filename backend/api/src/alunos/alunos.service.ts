@@ -29,6 +29,31 @@ async buscarAlunoPorId(id: number) {
   return aluno;
 }
 
+async buscarTreinosDoAluno(id: number) {
+  const aluno = await this.prisma.aluno.findUnique({
+    where: { id },
+    include: {
+      treinos: {
+        orderBy: { diaSemana: 'asc' },
+        include: {
+          exercicios: {
+            orderBy: { ordem: 'asc' },
+            include: {
+              exercicio: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!aluno) {
+    throw new NotFoundException('Aluno não encontrado');
+  }
+
+  return aluno.treinos;
+}
+
 
 async atualizarAluno(id: number, data: any) {
 

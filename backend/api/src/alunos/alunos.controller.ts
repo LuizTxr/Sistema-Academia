@@ -19,9 +19,14 @@ export class AlunosController {
   }
 
   @Get(':id')
-buscarPorId(@Param('id') id: string) {
-  return this.alunosService.buscarAlunoPorId(Number(id));
-}
+  buscarPorId(@Param('id') id: string) {
+    return this.alunosService.buscarAlunoPorId(Number(id));
+  }
+
+  @Get(':id/treinos')
+  buscarTreinos(@Param('id') id: string) {
+    return this.alunosService.buscarTreinosDoAluno(Number(id));
+  }
 
 @Put(':id')
 atualizar(@Param('id') id: string, @Body() data: UpdateAlunoDto) {
