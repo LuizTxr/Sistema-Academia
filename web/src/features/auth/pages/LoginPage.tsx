@@ -2,11 +2,12 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
 import { persistStudentSession } from '../../../services/storage/session-storage'
-import { mockStudents } from '../services/mock-students'
+import { apiClient } from '../../../services/api/client'
 
 export function LoginPage() {
   const [enrollmentCode, setEnrollmentCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   function handleEnrollmentChange(value: string) {
     setEnrollmentCode(value.replace(/\D/g, ''))
@@ -16,7 +17,7 @@ export function LoginPage() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const normalizedCode = enrollmentCode.trim()
@@ -26,17 +27,23 @@ export function LoginPage() {
       return
     }
 
-    const student = mockStudents.find(
-      (studentItem) => studentItem.enrollmentCode === normalizedCode,
-    )
+    setIsLoading(true)
 
-    if (!student) {
+    try {
+      const { aluno } = await apiClient.loginAluno(normalizedCode)
+
+      persistStudentSession({
+        id: aluno.id,
+        enrollmentCode: aluno.matricula,
+        studentName: aluno.nome,
+      })
+
+      window.location.reload()
+    } catch {
       setErrorMessage('Matricula nao encontrada.')
-      return
+    } finally {
+      setIsLoading(false)
     }
-
-    persistStudentSession(student)
-    window.location.reload()
   }
 
   return (
@@ -81,9 +88,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            className="flex h-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-accent-strong)] px-4 text-sm font-semibold text-white transition active:scale-[0.99]"
+            disabled={isLoading}
+            className="flex h-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-accent-strong)] px-4 text-sm font-semibold text-white transition active:scale-[0.99] disabled:opacity-60"
           >
-            Entrar
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>

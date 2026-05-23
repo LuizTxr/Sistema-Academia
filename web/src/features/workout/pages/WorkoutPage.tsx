@@ -209,7 +209,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   return (
     <MobilePage
       title={session.studentName}
-      subtitle={session.studentGoal}
+      subtitle={undefined}
       headerAction={
         <button
           type="button"
