@@ -25,14 +25,14 @@ model Professor {
 
 model Equipamento {
   id         Int         @id @default(autoincrement())
-  nome       String
+  nome       String      @unique
   tipo       String
   exercicios Exercicio[]
 }
 
 model Exercicio {
   id            Int               @id @default(autoincrement())
-  nome          String
+  nome          String            @unique
   grupoMuscular String
   equipamentoId Int
   equipamento   Equipamento       @relation(fields: [equipamentoId], references: [id])
@@ -42,6 +42,8 @@ model Exercicio {
 model Treino {
   id          Int               @id @default(autoincrement())
   nome        String
+  diaSemana   String
+  ativo       Boolean           @default(true)
   professorId Int
   alunoId     Int
   objetivo    String
