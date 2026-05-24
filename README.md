@@ -1,98 +1,89 @@
-# Sistema-Academia
+# Sistema Academia
 
-Sistema de gestao de treinos com foco em experiencia mobile first para alunos de academia.
+Sistema de gestão de treinos com foco mobile. O aluno faz login pela matrícula e acompanha sua semana de treinos com exercícios, séries e progresso salvo no banco de dados.
 
-## Visao Geral
+## Requisitos
 
-O projeto esta organizado para separar frontend, backend e futuras extensoes mobile.
+- [Node.js](https://nodejs.org/) v18+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-Hoje, o frontend web ja possui um MVP navegavel para demonstracao do fluxo principal do aluno:
+## Como rodar
 
-- login por matricula
-- sessao local no dispositivo
-- selecao automatica do treino pelo dia atual
-- visualizacao dos treinos por dia da semana
-- expansao de exercicios
-- conclusao sequencial de series
-- conclusao de exercicio
-- rascunho local persistido no navegador
-- salvamento local de progresso
+### 1. Clone o repositório
 
-## Estrutura do Projeto
-
-```text
-Sistema-Academia/
-  backend/
-    api/
-  web/
-  mobile/
-  database/
-  infra/
-  docs/
+```bash
+git clone https://github.com/LuizTxr/Sistema-Academia.git
+cd Sistema-Academia
 ```
 
-### Pastas principais
+### 2. Configure as variáveis de ambiente
 
-- `backend/api`: backend em NestJS
-- `web`: frontend web em React + Vite + TypeScript
-- `mobile`: reservado para futura experiencia mobile dedicada
-- `database`: artefatos relacionados a banco
-- `infra`: configuracoes de infraestrutura
-- `docs`: documentacao de apoio
+**Backend:**
+```bash
+cp backend/api/.env.example backend/api/.env
+```
 
-## Frontend
+**Frontend:**
+```bash
+cp web/.env.example web/.env
+```
 
-O frontend fica em [`web`](C:\GIT\Sistema-Academia\web) e segue estas diretrizes:
+### 3. Suba o backend
 
-- React com Vite
-- TypeScript
-- Tailwind CSS
-- mobile first
-- organizacao por features
-- tokens visuais centralizados
+```bash
+cd backend/api
+npm install
+npm run dev
+```
 
-### Estado atual do frontend
+Esse comando sobe o banco de dados via Docker, roda as migrations, popula os dados iniciais e inicia a API.
 
-O fluxo demonstravel atual e:
+- API disponível em `http://localhost:3000`
+- Documentação Swagger em `http://localhost:3000/api`
 
-1. aluno acessa a tela de login
-2. entra com a matricula
-3. cai direto na tela de treino
-4. visualiza o treino correspondente ao dia atual
-5. navega entre os dias ativos
-6. expande exercicios
-7. conclui series em sequencia
-8. conclui exercicios
-9. salva o progresso localmente
+### 4. Suba o frontend
 
-### Rodando o frontend
+Em outro terminal:
 
-```powershell
+```bash
 cd web
 npm install
 npm run dev
 ```
 
-### Build do frontend
+Frontend disponível em `http://localhost:5173`.
 
-```powershell
-cd web
-npm run build
+## Acessos de teste
+
+| Matrícula | Nome            |
+|-----------|-----------------|
+| 1001      | Lucas Andrade   |
+| 1002      | Marina Costa    |
+| 1003      | Rafael Souza    |
+| 1004      | Juliana Lima    |
+| 1005      | Bruno Mendes    |
+| 1006      | Camila Ferreira |
+| 1007      | Diego Oliveira  |
+| 1008      | Fernanda Rocha  |
+| 1009      | Gustavo Nunes   |
+| 1010      | Helena Martins  |
+
+## Estrutura do projeto
+
+```
+Sistema-Academia/
+├── backend/api/    # NestJS + Prisma + PostgreSQL
+├── web/            # React + Vite + Tailwind CSS
+├── docs/           # Documentação e contratos de API
+└── docker-compose.yml
 ```
 
-## Backend
+## Resetar o banco
 
-O backend atual fica em [`backend/api`](C:\GIT\Sistema-Academia\backend\api).
+Para limpar tudo e popular do zero:
 
-Para instalar as dependencias do backend:
-
-```powershell
+```bash
 cd backend/api
-npm install
+docker compose down -v
+npm run dev
 ```
-
-## Observacoes
-
-- o frontend atual ainda utiliza dados locais para demonstracao
-- a integracao completa com a API NestJS ainda e um proximo passo
-- o projeto ja esta em um ponto adequado para apresentar o fluxo principal do produto
