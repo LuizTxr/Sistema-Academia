@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
 import { AlunosService } from './alunos.service';
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 import { UpdateAlunoDto } from './dto/update-aluno.dto';
@@ -24,8 +24,22 @@ export class AlunosController {
   }
 
   @Get(':id/treinos')
-  buscarTreinos(@Param('id') id: string) {
-    return this.alunosService.buscarTreinosDoAluno(Number(id));
+  buscarTreinos(@Param('id', ParseIntPipe) id: number) {
+    return this.alunosService.buscarTreinosDoAluno(id);
+  }
+
+  @Put(':id/treinos/:diaSemana/progresso')
+  salvarProgresso(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('diaSemana') diaSemana: string,
+    @Body() body: { seriesConcluidas: string[]; exerciciosConcluidos: string[] },
+  ) {
+    return this.alunosService.salvarProgresso(
+      id,
+      diaSemana,
+      body.seriesConcluidas,
+      body.exerciciosConcluidos,
+    );
   }
 
 @Put(':id')

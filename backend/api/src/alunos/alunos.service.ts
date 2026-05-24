@@ -38,10 +38,9 @@ async buscarTreinosDoAluno(id: number) {
         include: {
           exercicios: {
             orderBy: { ordem: 'asc' },
-            include: {
-              exercicio: true,
-            },
+            include: { exercicio: true },
           },
+          progresso: true,
         },
       },
     },
@@ -52,6 +51,27 @@ async buscarTreinosDoAluno(id: number) {
   }
 
   return aluno.treinos;
+}
+
+async salvarProgresso(
+  alunoId: number,
+  diaSemana: string,
+  seriesConcluidas: string[],
+  exerciciosConcluidos: string[],
+) {
+  const treino = await this.prisma.treino.findFirst({
+    where: { alunoId, diaSemana },
+  });
+
+  if (!treino) {
+    throw new NotFoundException('Treino não encontrado');
+  }
+
+  return this.prisma.progressoTreino.upsert({
+    where: { alunoId_treinoId: { alunoId, treinoId: treino.id } },
+    update: { seriesConcluidas, exerciciosConcluidos },
+    create: { alunoId, treinoId: treino.id, seriesConcluidas, exerciciosConcluidos },
+  });
 }
 
 
