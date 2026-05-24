@@ -2,12 +2,12 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
 import { persistStudentSession } from '../../../services/storage/session-storage'
-import { apiClient } from '../../../services/api/client'
+import { loginStudent } from '../services/auth-api'
 
 export function LoginPage() {
   const [enrollmentCode, setEnrollmentCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleEnrollmentChange(value: string) {
     setEnrollmentCode(value.replace(/\D/g, ''))
@@ -27,22 +27,18 @@ export function LoginPage() {
       return
     }
 
-    setIsLoading(true)
+    setIsSubmitting(true)
 
     try {
-      const { aluno } = await apiClient.loginAluno(normalizedCode)
-
-      persistStudentSession({
-        id: aluno.id,
-        enrollmentCode: aluno.matricula,
-        studentName: aluno.nome,
-      })
-
+      const student = await loginStudent(normalizedCode)
+      persistStudentSession(student)
       window.location.reload()
-    } catch {
-      setErrorMessage('Matricula nao encontrada.')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Nao foi possivel entrar.',
+      )
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -73,6 +69,7 @@ export function LoginPage() {
               type="text"
               inputMode="numeric"
               autoComplete="off"
+              disabled={isSubmitting}
               value={enrollmentCode}
               onChange={(event) => handleEnrollmentChange(event.target.value)}
               placeholder="000000"
@@ -88,10 +85,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="flex h-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-accent-strong)] px-4 text-sm font-semibold text-white transition active:scale-[0.99] disabled:opacity-60"
           >
-            {isLoading ? 'Entrando...' : 'Entrar'}
+            {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>

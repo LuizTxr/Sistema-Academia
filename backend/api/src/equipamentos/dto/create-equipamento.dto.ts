@@ -1,16 +1,11 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateEquipamentoDto {
-
   @IsString()
+  @IsNotEmpty()
   nome: string;
 
-  @IsOptional()
   @IsString()
-  tipo?: string;
-
-  @IsOptional()
-  @IsString()
-  descricao?: string;
-
+  @IsNotEmpty()
+  tipo: string;
 }

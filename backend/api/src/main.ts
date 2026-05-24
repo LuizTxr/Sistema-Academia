@@ -12,7 +12,6 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL,
   });
 
-  // Validação global
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,7 +19,6 @@ async function bootstrap() {
     }),
   );
 
-  // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle('API Academia')
     .setDescription('Documentação da API do sistema de academia')
@@ -34,5 +32,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-console.log(process.env.DATABASE_URL);

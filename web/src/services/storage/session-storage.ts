@@ -6,8 +6,8 @@ import type {
 
 export const sessionStorageKeys = {
   studentSession: 'student-session',
-  workoutDraftByDay: 'workout-draft-by-day',
-  workoutSavedStateByDay: 'workout-saved-state-by-day',
+  workoutDraftByDayPrefix: 'workout-draft-by-day',
+  workoutSavedStateByDayPrefix: 'workout-saved-state-by-day',
 }
 
 export function getStudentSession() {
@@ -38,6 +38,10 @@ export function clearStudentSession() {
   window.localStorage.removeItem(sessionStorageKeys.studentSession)
 }
 
+function buildStudentScopedStorageKey(prefix: string, enrollmentCode: string) {
+  return `${prefix}:${enrollmentCode}`
+}
+
 function readJsonStorage<T>(storageKey: string) {
   const storedValue = window.localStorage.getItem(storageKey)
 
@@ -53,35 +57,61 @@ function readJsonStorage<T>(storageKey: string) {
   }
 }
 
-export function getWorkoutDraftByDay() {
+export function getWorkoutDraftByDay(enrollmentCode: string) {
   return readJsonStorage<WorkoutDraftByDay>(
-    sessionStorageKeys.workoutDraftByDay,
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutDraftByDayPrefix,
+      enrollmentCode,
+    ),
   )
 }
 
-export function persistWorkoutDraftByDay(draftByDay: WorkoutDraftByDay) {
+export function persistWorkoutDraftByDay(
+  enrollmentCode: string,
+  draftByDay: WorkoutDraftByDay,
+) {
   window.localStorage.setItem(
-    sessionStorageKeys.workoutDraftByDay,
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutDraftByDayPrefix,
+      enrollmentCode,
+    ),
     JSON.stringify(draftByDay),
   )
 }
 
-export function getWorkoutSavedStateByDay() {
+export function getWorkoutSavedStateByDay(enrollmentCode: string) {
   return readJsonStorage<WorkoutSavedStateByDay>(
-    sessionStorageKeys.workoutSavedStateByDay,
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutSavedStateByDayPrefix,
+      enrollmentCode,
+    ),
   )
 }
 
 export function persistWorkoutSavedStateByDay(
+  enrollmentCode: string,
   savedStateByDay: WorkoutSavedStateByDay,
 ) {
   window.localStorage.setItem(
-    sessionStorageKeys.workoutSavedStateByDay,
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutSavedStateByDayPrefix,
+      enrollmentCode,
+    ),
     JSON.stringify(savedStateByDay),
   )
 }
 
-export function clearWorkoutProgressStorage() {
-  window.localStorage.removeItem(sessionStorageKeys.workoutDraftByDay)
-  window.localStorage.removeItem(sessionStorageKeys.workoutSavedStateByDay)
+export function clearWorkoutProgressStorage(enrollmentCode: string) {
+  window.localStorage.removeItem(
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutDraftByDayPrefix,
+      enrollmentCode,
+    ),
+  )
+  window.localStorage.removeItem(
+    buildStudentScopedStorageKey(
+      sessionStorageKeys.workoutSavedStateByDayPrefix,
+      enrollmentCode,
+    ),
+  )
 }

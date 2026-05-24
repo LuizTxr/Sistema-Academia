@@ -8,10 +8,11 @@ import {
   persistWorkoutDraftByDay,
   persistWorkoutSavedStateByDay,
 } from '../../../services/storage/session-storage'
-import { apiClient } from '../../../services/api/client'
+import { salvarProgresso } from '../../../services/api/client'
 import type { StudentSession } from '../../../types/auth'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { WeekDayTabs } from '../components/WeekDayTabs'
+import { fetchWorkoutDays } from '../services/workout-api'
 import type { WorkoutDay, WorkoutDraftByDay, WorkoutSavedStateByDay } from '../types/workout'
 
 type WorkoutPageProps = {
@@ -33,7 +34,7 @@ function getInitialSelectedDayId(days: WorkoutDay[]) {
     if (nextActiveDay) return nextActiveDay.id
   }
 
-  return days.find((day) => day.active)?.id ?? days[0].id
+  return days.find((day) => day.active)?.id ?? days[0]?.id ?? ''
 }
 
 export function WorkoutPage({ session }: WorkoutPageProps) {
@@ -50,7 +51,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
   useEffect(() => {
-    apiClient.buscarTreinos(session.id).then(({ dias, progressoInicial }) => {
+    fetchWorkoutDays(session.id).then(({ dias, progressoInicial }) => {
       setWorkoutDays(dias)
       setSelectedDayId(getInitialSelectedDayId(dias))
       setDraftByDay(progressoInicial)
@@ -117,7 +118,9 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleToggleSet(exerciseId: string, setId: string) {
-    const exercise = selectedDay?.exercises.find(
+    if (!selectedDay) return
+
+    const exercise = selectedDay.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
 
@@ -160,7 +163,9 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleCompleteExercise(exerciseId: string) {
-    const exercise = selectedDay?.exercises.find(
+    if (!selectedDay) return
+
+    const exercise = selectedDay.exercises.find(
       (exerciseItem) => exerciseItem.id === exerciseId,
     )
 
@@ -188,7 +193,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
       return nextSavedStateByDay
     })
 
-    apiClient.salvarProgresso(
+    salvarProgresso(
       session.id,
       selectedDayId,
       progresso.completedSetIds,

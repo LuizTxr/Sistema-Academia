@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateEquipamentoDto } from './dto/create-equipamento.dto';
+import { UpdateEquipamentoDto } from './dto/update-equipamento.dto';
 
 @Injectable()
 export class EquipamentosService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private prisma: PrismaService) {}
-
-  criar(data: any) {
+  criar(data: CreateEquipamentoDto) {
     return this.prisma.equipamento.create({
-      data,
+      data: {
+        nome: data.nome,
+        tipo: data.tipo,
+      },
     });
   }
 
@@ -16,20 +20,33 @@ export class EquipamentosService {
     return this.prisma.equipamento.findMany();
   }
 
-  buscarPorId(id: number) {
-    return this.prisma.equipamento.findUnique({
+  async buscarPorId(id: number) {
+    const equipamento = await this.prisma.equipamento.findUnique({
       where: { id },
     });
+
+    if (!equipamento) {
+      throw new NotFoundException('Equipamento nao encontrado');
+    }
+
+    return equipamento;
   }
 
-  atualizar(id: number, data: any) {
+  async atualizar(id: number, data: UpdateEquipamentoDto) {
+    await this.buscarPorId(id);
+
     return this.prisma.equipamento.update({
       where: { id },
-      data,
+      data: {
+        nome: data.nome,
+        tipo: data.tipo,
+      },
     });
   }
 
-  remover(id: number) {
+  async remover(id: number) {
+    await this.buscarPorId(id);
+
     return this.prisma.equipamento.delete({
       where: { id },
     });

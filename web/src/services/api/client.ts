@@ -1,6 +1,47 @@
 import type { WorkoutDay, WorkoutDraftByDay } from '../../features/workout/types/workout'
 
-const baseUrl = import.meta.env.VITE_BACKEND_URL
+export const apiClient = {
+  baseUrl: import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000',
+}
+
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${apiClient.baseUrl}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+    ...init,
+  })
+
+  if (!response.ok) {
+    let message = 'Nao foi possivel concluir a requisicao.'
+
+    try {
+      const payload = (await response.json()) as { message?: string | string[] }
+      if (Array.isArray(payload.message)) {
+        message = payload.message.join(', ')
+      } else if (payload.message) {
+        message = payload.message
+      }
+    } catch {
+      // Mantem a mensagem padrao quando o backend nao devolve JSON.
+    }
+
+    throw new ApiError(message, response.status)
+  }
+
+  return response.json() as Promise<T>
+}
 
 const labelPorDia: Record<string, string> = {
   seg: 'Seg', ter: 'Ter', qua: 'Qua',
@@ -9,81 +50,52 @@ const labelPorDia: Record<string, string> = {
 
 const ordemDias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom']
 
-export const apiClient = {
-  async loginAluno(matricula: string) {
-    const response = await fetch(`${baseUrl}/api/auth/aluno/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ matricula }),
-    })
+export async function buscarTreinos(
+  alunoId: number,
+): Promise<{ dias: WorkoutDay[]; progressoInicial: WorkoutDraftByDay }> {
+  const treinos = await apiRequest<any[]>(`/alunos/${alunoId}/treinos`)
 
-    if (!response.ok) {
-      throw new Error('Matricula nao encontrada.')
-    }
+  const progressoInicial: WorkoutDraftByDay = {}
 
-    return response.json() as Promise<{
-      aluno: { id: number; matricula: string; nome: string }
-    }>
-  },
-
-  async buscarTreinos(alunoId: number): Promise<{ dias: WorkoutDay[]; progressoInicial: WorkoutDraftByDay }> {
-    const response = await fetch(`${baseUrl}/alunos/${alunoId}/treinos`)
-
-    if (!response.ok) {
-      throw new Error('Erro ao buscar treinos.')
-    }
-
-    const treinos: any[] = await response.json()
-
-    const progressoInicial: WorkoutDraftByDay = {}
-
-    const dias: WorkoutDay[] = treinos
-      .sort((a, b) => ordemDias.indexOf(a.diaSemana) - ordemDias.indexOf(b.diaSemana))
-      .map((treino) => {
-        if (treino.progresso) {
-          progressoInicial[treino.diaSemana] = {
-            completedSetIds: treino.progresso.seriesConcluidas,
-            completedExerciseIds: treino.progresso.exerciciosConcluidos,
-          }
+  const dias: WorkoutDay[] = treinos
+    .sort((a, b) => ordemDias.indexOf(a.diaSemana) - ordemDias.indexOf(b.diaSemana))
+    .map((treino) => {
+      if (treino.progresso) {
+        progressoInicial[treino.diaSemana] = {
+          completedSetIds: treino.progresso.seriesConcluidas,
+          completedExerciseIds: treino.progresso.exerciciosConcluidos,
         }
+      }
 
-        return {
-          id: treino.diaSemana,
-          label: labelPorDia[treino.diaSemana] ?? treino.diaSemana,
-          active: treino.ativo,
-          title: treino.nome,
-          exercises: treino.exercicios.map((te: any) => ({
-            id: String(te.exercicioId),
-            name: te.exercicio.nome,
-            notes: te.observacao ?? undefined,
-            sets: Array.from({ length: te.series }, (_, i) => ({
-              id: `ex-${te.exercicioId}-serie-${i + 1}`,
-              label: `Serie ${i + 1}`,
-              reps: `${te.repeticoes} reps`,
-            })),
+      return {
+        id: treino.diaSemana,
+        label: labelPorDia[treino.diaSemana] ?? treino.diaSemana,
+        active: treino.ativo,
+        title: treino.nome,
+        exercises: treino.exercicios.map((te: any) => ({
+          id: String(te.exercicioId),
+          name: te.exercicio.nome,
+          notes: te.observacao ?? undefined,
+          sets: Array.from({ length: te.series }, (_, i) => ({
+            id: `ex-${te.exercicioId}-serie-${i + 1}`,
+            label: `Serie ${i + 1}`,
+            reps: `${te.repeticoes} reps`,
           })),
-        }
-      })
-
-    return { dias, progressoInicial }
-  },
-
-  async salvarProgresso(
-    alunoId: number,
-    diaSemana: string,
-    seriesConcluidas: string[],
-    exerciciosConcluidos: string[],
-  ) {
-    const response = await fetch(`${baseUrl}/alunos/${alunoId}/treinos/${diaSemana}/progresso`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seriesConcluidas, exerciciosConcluidos }),
+        })),
+      }
     })
 
-    if (!response.ok) {
-      throw new Error('Erro ao salvar progresso.')
-    }
+  return { dias, progressoInicial }
+}
 
-    return response.json()
-  },
+export function salvarProgresso(
+  alunoId: number,
+  diaSemana: string,
+  seriesConcluidas: string[],
+  exerciciosConcluidos: string[],
+) {
+  return apiRequest(`/alunos/${alunoId}/treinos/${diaSemana}/progresso`, {
+    method: 'PUT',
+    body: JSON.stringify({ seriesConcluidas, exerciciosConcluidos }),
+  })
 }
