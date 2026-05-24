@@ -7,12 +7,13 @@ datasource db {
 }
 
 model Aluno {
-  id        Int      @id @default(autoincrement())
-  matricula String   @unique
+  id        Int               @id @default(autoincrement())
+  matricula String            @unique
   nome      String
-  email     String   @unique
+  email     String            @unique
   telefone  String?
   treinos   Treino[]
+  progressos ProgressoTreino[]
 }
 
 model Professor {
@@ -50,6 +51,20 @@ model Treino {
   aluno       Aluno             @relation(fields: [alunoId], references: [id])
   professor   Professor         @relation(fields: [professorId], references: [id])
   exercicios  TreinoExercicio[]
+  progresso   ProgressoTreino?
+}
+
+model ProgressoTreino {
+  id                   Int      @id @default(autoincrement())
+  alunoId              Int
+  treinoId             Int      @unique
+  seriesConcluidas     String[]
+  exerciciosConcluidos String[]
+  salvoEm              DateTime @updatedAt
+  aluno                Aluno    @relation(fields: [alunoId], references: [id])
+  treino               Treino   @relation(fields: [treinoId], references: [id])
+
+  @@unique([alunoId, treinoId])
 }
 
 model TreinoExercicio {
