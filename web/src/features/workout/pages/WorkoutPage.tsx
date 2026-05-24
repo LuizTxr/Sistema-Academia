@@ -50,9 +50,11 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
   useEffect(() => {
-    apiClient.buscarTreinos(session.id).then((dias) => {
+    apiClient.buscarTreinos(session.id).then(({ dias, progressoInicial }) => {
       setWorkoutDays(dias)
       setSelectedDayId(getInitialSelectedDayId(dias))
+      setDraftByDay(progressoInicial)
+      setSavedStateByDay(progressoInicial)
       setIsLoading(false)
     })
   }, [session.id])
@@ -175,17 +177,24 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
   }
 
   function handleSaveProgress() {
+    const progresso = {
+      completedSetIds: [...selectedDraft.completedSetIds],
+      completedExerciseIds: [...selectedDraft.completedExerciseIds],
+    }
+
     setSavedStateByDay((currentSavedStateByDay) => {
-      const nextSavedStateByDay = {
-        ...currentSavedStateByDay,
-        [selectedDayId]: {
-          completedSetIds: [...selectedDraft.completedSetIds],
-          completedExerciseIds: [...selectedDraft.completedExerciseIds],
-        },
-      }
+      const nextSavedStateByDay = { ...currentSavedStateByDay, [selectedDayId]: progresso }
       persistWorkoutSavedStateByDay(nextSavedStateByDay)
       return nextSavedStateByDay
     })
+
+    apiClient.salvarProgresso(
+      session.id,
+      selectedDayId,
+      progresso.completedSetIds,
+      progresso.completedExerciseIds,
+    )
+
     setSavedAt(new Date().toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
