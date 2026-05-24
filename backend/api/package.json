@@ -22,6 +22,7 @@
     "db:down": "docker compose down",
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset",
+    "db:seed": "node prisma/seed.js",
     "db:studio": "npx prisma studio",
     "dev": "npm run db:up && npm run db:migrate && npm run start:dev"
   },
@@ -84,6 +85,6 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   }
 }
