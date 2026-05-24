@@ -96,6 +96,58 @@ cd backend/api
 npm install
 ```
 
+### Rodando o backend
+
+Suba o banco, aplique as migrations e inicie o servidor em modo watch com um unico comando:
+
+```powershell
+cd backend/api
+npm run dev
+```
+
+### Banco de dados
+
+O banco roda em PostgreSQL via Docker. Os comandos abaixo gerenciam o ciclo de vida dos dados de desenvolvimento.
+
+#### Resetar o banco
+
+Apaga todos os dados, recria o schema do zero aplicando todas as migrations e em seguida popula com os dados de teste automaticamente:
+
+```powershell
+npm run db:reset
+```
+
+Use quando: o banco estiver desatualizado em relacao as migrations, os dados estiverem sujos ou voce quiser comecar do zero.
+
+#### Popular com dados de teste (seed)
+
+Apaga os dados existentes e insere os dados de teste sem mexer no schema:
+
+```powershell
+npm run db:seed
+```
+
+Use quando: o schema ja esta correto e voce so precisa dos dados de teste.
+
+#### Dados de teste disponiveis
+
+A seed cria 1 professor, 8 equipamentos, 15 exercicios e 10 alunos. Cada aluno tem entre 5 e 7 treinos distribuidos nos dias da semana, cada treino com 3 a 4 exercicios com series, repeticoes, carga e descanso definidos.
+
+Matriculas disponiveis para login:
+
+| Matricula | Aluno |
+|-----------|-------|
+| 1001 | Ana Beatriz Costa |
+| 1002 | Bruno Ferreira |
+| 1003 | Carla Menezes |
+| 1004 | Diego Albuquerque |
+| 1005 | Elisa Ramos |
+| 1006 | Felipe Nunes |
+| 1007 | Gabriela Lopes |
+| 1008 | Henrique Barbosa |
+| 1009 | Isabela Martins |
+| 1010 | Joao Pedro Oliveira |
+
 ### Autenticacao transitoria do backend
 
 Os endpoints protegidos usam, por enquanto, estes headers:
