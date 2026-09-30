@@ -327,11 +327,35 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 5. Escrever a pagina, so com JSX e chamadas de hook: `<pagina>.page.tsx`.
 6. Montar a interface com Compound Components; criar em `components/` o que for novo.
 7. Adicionar o path em `shared/lib/paths.ts` e a rota em `app/router/router.tsx`, com `lazy`.
-8. Conferir o idioma (portugues, sem acentos nos nomes), a regra de dependencia (page -> hook -> service -> dto) e rodar `npm run lint` e `npm run build`.
+8. Conferir o idioma (portugues, sem acentos nos nomes), a regra de dependencia (page -> hook -> service -> dto) e rodar `npm run lint`, `npm test` e `npm run build`.
 
-## 7. Em aberto
+## 7. Testes
+
+- **Ferramenta:** Vitest com Testing Library e jsdom. Rodar tudo: `npm test`. Modo continuo: `npm run test:watch`. O backend tem os proprios testes (Jest), em `backend/api`.
+- **Onde ficam:** ao lado do arquivo testado, com o sufixo `.test` (`treino.hook.test.tsx`, `exercicio.test.tsx`). A configuracao comum fica em `src/test/setup.ts` (limpa a tela e o `localStorage` depois de cada teste).
+- **O que testar em cada camada** (cada linha aponta um arquivo-exemplo para copiar o jeito de fazer):
+
+| Camada | Como testar | Exemplo |
+|---|---|---|
+| `.dto` | Nao precisa (so tipos). | - |
+| `.service` | Trocar o `fetch` por um falso (`vi.stubGlobal`) e conferir URL, metodo, headers, corpo e a conversao da resposta para o modelo em portugues. | `treino.service.test.ts` |
+| `.hook` (regras) | Funcoes puras exportadas, testadas direto, sem React. | `aluno-cadastro.hook.test.ts` |
+| `.hook` (completo) | `renderHook` com o provider da sessao e o service trocado por um falso. | `treino.hook.test.tsx` |
+| `.page` | Em geral nao precisa: ela so compoe. Teste os componentes e o hook. | - |
+| `components/` | Renderizar, interagir com `userEvent` e consultar como o usuario ve (papel e texto), nao por classe CSS. | `exercicio.test.tsx` |
+| Rotas e guards | `MemoryRouter` com o provider da sessao. | `protected.route.test.tsx` |
+
+- **O que nao testar:** codigo trivial (repasse de props, caminhos, leitura e escrita simples no `localStorage`) e aparencia (classes CSS, cores, alinhamento). Se quebrar, a tela mostra. Teste o que, se errar, o usuario nao percebe na hora: regras de negocio, contrato com a API e permissoes.
+- **Regras:**
+  - O nome do teste descreve o comportamento, em portugues.
+  - Cada arquivo cria os proprios dados (funcoes como `exercicio(...)`), sem depender de outro teste ou do banco.
+  - Classe CSS so e testada quando ela e o proprio comportamento pedido (ex.: o `Voltar` sempre na coluna da esquerda).
+  - Testes que dependem do dia usam `vi.useFakeTimers({ toFake: ['Date'] })`.
+  - Um hook que exige sessao roda dentro de um wrapper que so renderiza quando ha sessao, como faz o `ProtectedRoute`.
+  - Ao corrigir um bug, escreva antes o teste que o reproduz.
+
+## 8. Em aberto
 
 - Adotar TanStack Query ou manter hooks manuais para busca de dados.
 - Regra de ESLint para o nome dos arquivos (kebab-case e sufixos permitidos), por exemplo com `eslint-plugin-check-file`.
-- Estrategia de testes.
 - Aprovar as sugestoes de padroes internos dos compound components (secao 4).
