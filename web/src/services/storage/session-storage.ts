@@ -1,4 +1,4 @@
-import type { StudentSession } from '../../types/auth'
+import type { StudentSession } from '../../features/auth/auth.dto'
 import type {
   WorkoutDraftByDay,
   WorkoutSavedStateByDay,

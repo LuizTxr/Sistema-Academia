@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react'
 import { MobilePage } from '../../../components/ui/MobilePage'
 import {
-  clearStudentSession,
-  clearWorkoutProgressStorage,
   getWorkoutDraftByDay,
   getWorkoutSavedStateByDay,
   persistWorkoutDraftByDay,
   persistWorkoutSavedStateByDay,
 } from '../../../services/storage/session-storage'
-import type { StudentSession } from '../../../types/auth'
+import { useAuth } from '../../auth/auth.hook'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { WeekDayTabs } from '../components/WeekDayTabs'
 import { fetchWorkoutDays } from '../services/workout-api'
 import type { WorkoutDraftByDay, WorkoutSavedStateByDay } from '../types/workout'
-
-type WorkoutPageProps = {
-  session: StudentSession
-}
 
 const dayIdByWeekDay = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
 
@@ -68,7 +62,9 @@ type WorkoutPageDay = {
   }[]
 }
 
-export function WorkoutPage({ session }: WorkoutPageProps) {
+export function WorkoutPage() {
+  const { session: authSession, signOut } = useAuth()
+  const session = authSession!
   const [selectedDayId, setSelectedDayId] = useState(getInitialSelectedDayId)
   const [workoutDays, setWorkoutDays] = useState<WorkoutPageDay[]>([])
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
@@ -110,9 +106,7 @@ export function WorkoutPage({ session }: WorkoutPageProps) {
     JSON.stringify(selectedDraft) !== JSON.stringify(selectedSavedState)
 
   function handleLogout() {
-    clearStudentSession()
-    clearWorkoutProgressStorage(session.enrollmentCode)
-    window.location.reload()
+    signOut()
   }
 
   function handleSelectDay(dayId: string) {

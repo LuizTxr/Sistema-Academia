@@ -1,46 +1,14 @@
-import type { FormEvent } from 'react'
-import { useState } from 'react'
-import { MobilePage } from '../../../components/ui/MobilePage'
-import { persistStudentSession } from '../../../services/storage/session-storage'
-import { loginStudent } from '../services/auth-api'
+import { MobilePage } from '../../components/ui/MobilePage'
+import { useLogin } from './login.hook'
 
 export function LoginPage() {
-  const [enrollmentCode, setEnrollmentCode] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  function handleEnrollmentChange(value: string) {
-    setEnrollmentCode(value.replace(/\D/g, ''))
-
-    if (errorMessage) {
-      setErrorMessage('')
-    }
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const normalizedCode = enrollmentCode.trim()
-
-    if (!normalizedCode) {
-      setErrorMessage('Informe sua matricula para entrar.')
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      const student = await loginStudent(normalizedCode)
-      persistStudentSession(student)
-      window.location.reload()
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Nao foi possivel entrar.',
-      )
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    enrollmentCode,
+    errorMessage,
+    isSubmitting,
+    changeEnrollmentCode,
+    submit,
+  } = useLogin()
 
   return (
     <MobilePage>
@@ -61,7 +29,7 @@ export function LoginPage() {
           </p>
         </header>
 
-        <form className="grid gap-4" onSubmit={handleSubmit}>
+        <form className="grid gap-4" onSubmit={submit}>
           <label className="grid gap-2" htmlFor="enrollmentCode">
             <input
               id="enrollmentCode"
@@ -71,7 +39,7 @@ export function LoginPage() {
               autoComplete="off"
               disabled={isSubmitting}
               value={enrollmentCode}
-              onChange={(event) => handleEnrollmentChange(event.target.value)}
+              onChange={(event) => changeEnrollmentCode(event.target.value)}
               placeholder="000000"
               className="h-12 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-center text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-soft)]"
             />
