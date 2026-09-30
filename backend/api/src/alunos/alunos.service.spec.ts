@@ -1,4 +1,5 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { AlunosService } from './alunos.service';
@@ -41,6 +42,34 @@ describe('AlunosService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('traduz matricula duplicada em conflito', async () => {
+    prisma.aluno.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('duplicado', {
+        code: 'P2002',
+        clientVersion: 'teste',
+        meta: { target: ['matricula'] },
+      }),
+    );
+
+    await expect(
+      service.criar({ nome: 'A', email: 'a@a.com', matricula: '1001' }),
+    ).rejects.toThrow(new ConflictException('Matricula ja cadastrada'));
+  });
+
+  it('traduz e-mail duplicado em conflito', async () => {
+    prisma.aluno.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('duplicado', {
+        code: 'P2002',
+        clientVersion: 'teste',
+        meta: { target: ['email'] },
+      }),
+    );
+
+    await expect(
+      service.criar({ nome: 'A', email: 'a@a.com', matricula: '9999' }),
+    ).rejects.toThrow(new ConflictException('E-mail ja cadastrado'));
   });
 
   it('busca aluno por matricula', async () => {

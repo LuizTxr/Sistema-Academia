@@ -3,6 +3,7 @@ import { AlunosModule } from './alunos/alunos.module';
 import { AlunoPortalModule } from './aluno-portal/aluno-portal.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfessoresModule } from './professores/professores.module';
+import { ProfessorPortalModule } from './professor-portal/professor-portal.module';
 import { TreinoExerciciosModule } from './treino-exercicios/treino-exercicios.module';
 import { TreinosModule } from './treinos/treinos.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -15,6 +16,7 @@ import { ExerciciosModule } from './exercicios/exercicios.module';
     AlunosModule,
     AlunoPortalModule,
     ProfessoresModule,
+    ProfessorPortalModule,
     TreinoExerciciosModule,
     TreinosModule,
     PrismaModule,

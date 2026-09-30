@@ -16,11 +16,18 @@ model Aluno {
 }
 
 model Professor {
-  id            Int      @id @default(autoincrement())
+  id            Int                  @id @default(autoincrement())
   nome          String
-  email         String   @unique
+  email         String               @unique
   especialidade String?
   treinos       Treino[]
+  credencial    CredencialProfessor?
+}
+
+model CredencialProfessor {
+  professorId Int       @id
+  senhaHash   String
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
 }
 
 model Equipamento {

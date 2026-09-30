@@ -2,6 +2,7 @@ require("dotenv").config()
 
 const { PrismaClient } = require("@prisma/client")
 const { PrismaPg } = require("@prisma/adapter-pg")
+const { criarCredencialProfessor } = require("./seed-senha")
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
@@ -138,6 +139,7 @@ async function main() {
   const professor = await prisma.professor.create({
     data: { nome: 'Joao Silva', email: 'joao.silva@academia.com', especialidade: 'Musculacao' },
   })
+  await criarCredencialProfessor(prisma, professor)
 
   // Cria equipamentos e indexa por nome
   const equipamentos = {}

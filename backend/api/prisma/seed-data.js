@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
+const { criarCredencialProfessor } = require('./seed-senha')
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -45,6 +46,9 @@ async function main() {
       },
     }),
   ])
+
+  await criarCredencialProfessor(prisma, professorPrincipal)
+  await criarCredencialProfessor(prisma, professorCondicionamento)
 
   const [
     equipamentoSupino,
