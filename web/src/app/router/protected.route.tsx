@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router'
 import { useSessao } from '@/shared/sessao/sessao.hook'
-import { paths } from './paths'
+import { paths } from '@/shared/lib/paths'
 
 export function ProtectedRoute() {
   const { sessao } = useSessao()

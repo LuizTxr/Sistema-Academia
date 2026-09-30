@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { paths } from '@/app/router/paths'
+import { paths } from '@/shared/lib/paths'
 import { useSessao } from '@/shared/sessao/sessao.hook'
 import { entrarAluno } from './auth.service'
 

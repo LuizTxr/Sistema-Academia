@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { GuestRoute, ProtectedRoute } from './protected.route'
-import { paths } from './paths'
+import { paths } from '@/shared/lib/paths'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to={paths.aluno.treino} replace /> },

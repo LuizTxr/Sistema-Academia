@@ -33,7 +33,7 @@ Os nomes do codigo (pastas, arquivos, componentes, funcoes, variaveis, tipos e p
 web/src/
   app/
     providers/              # composicao dos providers globais
-    router/                 # AppRouter, router, paths, protected.route (guards)
+    router/                 # AppRouter, router, protected.route (guards)
   features/
     auth/
       auth.dto.ts
@@ -50,7 +50,7 @@ web/src/
         abas-dias-semana.tsx
   shared/                   # usado por duas ou mais features
     components/             # UI generica (ex.: pagina-mobile.tsx)
-    lib/                    # cliente-api.ts, armazenamento.ts (storage generico)
+    lib/                    # cliente-api.ts, armazenamento.ts, paths.ts (URLs das rotas)
     sessao/                 # estado global da sessao do aluno (dto, service, hook, provider)
     styles/                 # theme.css, globals.css
   App.tsx
@@ -70,6 +70,25 @@ web/src/
 - Entre pastas diferentes, usar o alias `@/` (aponta para `src/`): `@/shared/lib/cliente-api`, `@/features/treino/treino.page`.
 - Dentro da mesma pasta, usar caminho relativo: `./treino.dto`, `../treino.dto`.
 - O alias esta configurado em `vite.config.ts` (`resolve.alias`) e em `tsconfig.app.json` (`paths`). Ao mudar um, mudar o outro.
+
+### Regras verificadas pelo ESLint
+
+As regras de importacao abaixo sao checadas por `npm run lint` (`no-restricted-imports`, configurado em `eslint.config.js`) e o erro aparece com uma mensagem em portugues apontando a regra quebrada.
+
+| Regra | Onde vale |
+|---|---|
+| Nao importar de `app/` | `shared/` e todas as features |
+| Nao importar de `features/` | `shared/` |
+| Nao importar de outra feature | cada feature |
+| A pagina nao importa o `.service` | `*.page.tsx` |
+| O hook nao importa a pagina | `*.hook.ts` |
+| O service nao importa React, hook nem pagina | `*.service.ts` |
+| O DTO nao importa nada da feature | `*.dto.ts` |
+| Entre pastas diferentes usar `@/`, nunca `../` que saia da feature ou da pasta | todos os arquivos |
+
+- As features novas sao descobertas pelas pastas de `src/features/`; nao e preciso editar o `eslint.config.js` ao criar uma feature.
+- Um novo papel de arquivo (novo sufixo) exige um novo item em `camadas` no `eslint.config.js`.
+- O que o ESLint nao verifica e revisado em code review: portugues nos nomes, uso de compound components e logica fora da pagina.
 
 ## 3. Estrutura de arquivos de uma pagina
 
@@ -278,7 +297,7 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 ## 5. Rotas
 
 - Definidas em `app/router/`, nunca dentro das features. A feature so exporta a pagina.
-- URLs ficam em `paths.ts`; nenhuma string de rota solta em `navigate()` ou `<Link>`.
+- As URLs ficam em `shared/lib/paths.ts` (usado por `app/` e pelas features); nenhuma string de rota solta em `navigate()` ou `<Link>`.
 - Prefixo por area: as rotas do aluno comecam com `/aluno` (`/aluno/login`, `/aluno/treino`). Uma area futura de professor usa `/professor`.
 - Paginas carregadas com `lazy` no data router.
 - Autenticacao por layout route (`ProtectedRoute` e `GuestRoute`): a pagina nao precisa saber de sessao.
@@ -291,12 +310,12 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 4. Escrever o hook com estado e regras: `<pagina>.hook.ts`.
 5. Escrever a pagina, so com JSX e chamadas de hook: `<pagina>.page.tsx`.
 6. Montar a interface com Compound Components; criar em `components/` o que for novo.
-7. Adicionar o path em `paths.ts` e a rota em `router.tsx`, com `lazy`.
+7. Adicionar o path em `shared/lib/paths.ts` e a rota em `app/router/router.tsx`, com `lazy`.
 8. Conferir o idioma (portugues, sem acentos nos nomes), a regra de dependencia (page -> hook -> service -> dto) e rodar `npm run lint` e `npm run build`.
 
 ## 7. Em aberto
 
 - Adotar TanStack Query ou manter hooks manuais para busca de dados.
-- Regra de ESLint (`no-restricted-imports`) para impor a direcao das dependencias.
+- Regra de ESLint para o nome dos arquivos (kebab-case e sufixos permitidos), por exemplo com `eslint-plugin-check-file`.
 - Estrategia de testes.
 - Aprovar as sugestoes de padroes internos dos compound components (secao 4).
