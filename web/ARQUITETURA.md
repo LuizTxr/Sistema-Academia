@@ -327,7 +327,7 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 5. Escrever a pagina, so com JSX e chamadas de hook: `<pagina>.page.tsx`.
 6. Montar a interface com Compound Components; criar em `components/` o que for novo.
 7. Adicionar o path em `shared/lib/paths.ts` e a rota em `app/router/router.tsx`, com `lazy`.
-8. Conferir o idioma (portugues, sem acentos nos nomes), a regra de dependencia (page -> hook -> service -> dto) e rodar `npm run lint`, `npm test` e `npm run build`.
+8. Conferir o idioma (portugues, sem acentos nos nomes), a regra de dependencia (page -> hook -> service -> dto) conferir a acessibilidade (secao 8) e rodar `npm run lint`, `npm test` e `npm run build`.
 
 ## 7. Testes
 
@@ -354,8 +354,22 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
   - Um hook que exige sessao roda dentro de um wrapper que so renderiza quando ha sessao, como faz o `ProtectedRoute`.
   - Ao corrigir um bug, escreva antes o teste que o reproduz.
 
-## 8. Em aberto
+## 8. Acessibilidade
+
+Referencia: WCAG 2.2 nivel AA. Regras para toda tela nova:
+
+- **Idioma e titulo:** o `index.html` declara `lang="pt-BR"` e um titulo real para a aba.
+- **Contraste:** texto normal precisa de pelo menos 4,5:1 contra o fundo (texto grande, 3:1). Ao criar ou mudar uma cor em `theme.css`, conferir o contraste contra os fundos onde ela aparece. Cuidado especial com `--color-text-muted`, `--color-danger` e com o inicio do gradiente do botao.
+- **Campos:** sempre com rotulo visivel (`Campo` e `CampoSelecao` ja fazem isso). Erros ficam ligados ao campo por `aria-describedby` e `aria-invalid`.
+- **Mensagens que aparecem sozinhas:** erros usam `role="alert"`; "carregando" e "salvo" usam `role="status"`, para o leitor de tela anunciar.
+- **Simbolos e indicadores so visuais:** o simbolo recebe `aria-hidden="true"` e a informacao vai em texto `sr-only` (ex.: o ponto de "com treino" nas abas). Botao so com icone precisa de `aria-label`.
+- **Estado dos controles:** `aria-expanded` em quem abre e fecha, `aria-pressed` em quem liga e desliga.
+- **Teclado e foco:** tudo que clica e um `button` ou `a`, nunca uma `div`. O foco visivel vem de `globals.css` (contorno de 2px na cor do tema); campos usam anel proprio. Nunca remover o contorno sem colocar outro no lugar.
+- **Movimento:** `prefers-reduced-motion` ja e respeitado em `globals.css`; novas animacoes nao precisam de tratamento extra.
+
+## 9. Em aberto
 
 - Adotar TanStack Query ou manter hooks manuais para busca de dados.
 - Regra de ESLint para o nome dos arquivos (kebab-case e sufixos permitidos), por exemplo com `eslint-plugin-check-file`.
 - Aprovar as sugestoes de padroes internos dos compound components (secao 4).
+- Auditoria de acessibilidade com ferramenta automatizada (axe ou Lighthouse) e com leitor de tela; hoje so ha verificacao manual do DOM e do contraste.

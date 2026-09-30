@@ -119,7 +119,10 @@ export function GestaoTreinosPage() {
       <PaginaMobile.Corpo>
         <div className="grid gap-4">
           {carregando ? (
-            <p className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]">
+            <p
+              role="status"
+              className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]"
+            >
               Carregando treinos...
             </p>
           ) : mensagemErro ? (

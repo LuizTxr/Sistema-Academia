@@ -63,7 +63,10 @@ function ExercicioCabecalho() {
             : `${seriesConcluidas.length}/${exercicio.series.length} series concluidas`}
         </p>
       </div>
-      <span className="shrink-0 text-lg text-[var(--color-text-muted)]">
+      <span
+        aria-hidden="true"
+        className="shrink-0 text-lg text-[var(--color-text-muted)]"
+      >
         {expandido ? '−' : '+'}
       </span>
     </button>

@@ -4,10 +4,10 @@
   --color-border-soft: #d8e2de;
   --color-text-strong: #18312a;
   --color-text-base: #345247;
-  --color-text-muted: #6a847a;
+  --color-text-muted: #58726a;
   --color-accent-strong: #1f7a5c;
   --color-accent-soft: #def3eb;
-  --color-danger: #b94a48;
+  --color-danger: #a83f3d;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -54,10 +54,10 @@
   --color-border-soft: #ddd5ef;
   --color-text-strong: #251a45;
   --color-text-base: #4a3f70;
-  --color-text-muted: #7a6d99;
+  --color-text-muted: #6b5f8b;
   --color-accent-strong: #6a4bc4;
   --color-accent-soft: #ebe4fa;
-  --gradiente-acento: linear-gradient(135deg, #8a63e0 0%, #5b3fb0 100%);
+  --gradiente-acento: linear-gradient(135deg, #7d55d4 0%, #5b3fb0 100%);
   --fundo-painel: linear-gradient(180deg, #f1ecfc 0%, #fcfbff 45%);
   --shadow-card: 0 18px 40px -24px rgba(53, 34, 110, 0.35);
 }

@@ -37,12 +37,14 @@ export function LoginAlunoPage() {
                 value={matricula}
                 onChange={(evento) => alterarMatricula(evento.target.value)}
                 placeholder="000000"
-                className="h-12 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-center text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-soft)]"
+                className="h-12 rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-center text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-strong)]"
               />
             </label>
 
             {mensagemErro && (
-              <p className="rounded-[var(--radius-card)] bg-[color:rgba(185,74,72,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
+              <p
+                role="alert"
+                className="rounded-[var(--radius-card)] bg-[color:rgba(185,74,72,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
                 {mensagemErro}
               </p>
             )}

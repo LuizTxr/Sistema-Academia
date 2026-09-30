@@ -2,7 +2,7 @@ import { useId } from 'react'
 import type { ComponentProps } from 'react'
 
 const estiloDoControle =
-  'h-12 w-full rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-soft)] disabled:opacity-60'
+  'h-12 w-full rounded-[var(--radius-card)] border border-[var(--color-border-soft)] bg-white px-4 text-base text-[var(--color-text-strong)] outline-none transition focus:border-[var(--color-accent-strong)] focus:ring-2 focus:ring-[var(--color-accent-strong)] disabled:opacity-60'
 
 type CampoProps = ComponentProps<'input'> & {
   rotulo: string

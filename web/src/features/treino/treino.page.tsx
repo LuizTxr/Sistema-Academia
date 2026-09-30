@@ -46,11 +46,17 @@ export function TreinoPage() {
           </p>
 
           {carregando ? (
-            <p className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]">
+            <p
+              role="status"
+              className="rounded-[var(--radius-card)] bg-white px-4 py-4 text-sm text-[var(--color-text-base)]"
+            >
               Carregando treino...
             </p>
           ) : mensagemErro ? (
-            <p className="rounded-[var(--radius-card)] bg-[color:rgba(185,74,72,0.12)] px-4 py-4 text-sm text-[var(--color-danger)]">
+            <p
+              role="alert"
+              className="rounded-[var(--radius-card)] bg-[color:rgba(185,74,72,0.12)] px-4 py-4 text-sm text-[var(--color-danger)]"
+            >
               {mensagemErro}
             </p>
           ) : diaSelecionado ? (
@@ -117,7 +123,10 @@ export function TreinoPage() {
           )}
 
           {salvoEm && (
-            <p className="text-center text-sm text-[var(--color-text-muted)]">
+            <p
+              role="status"
+              className="text-center text-sm text-[var(--color-text-muted)]"
+            >
               Progresso salvo as {salvoEm}.
             </p>
           )}

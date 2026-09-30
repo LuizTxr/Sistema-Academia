@@ -63,13 +63,16 @@ function AbasDiasSemanaAba({ dia }: AbasDiasSemanaAbaProps) {
     >
       {dia.rotulo}
       {dia.marcado && (
-        <span
-          aria-label="com treino"
-          className={[
-            'absolute top-1.5 right-1.5 size-1.5 rounded-full',
-            selecionado ? 'bg-white' : 'bg-[var(--color-accent-strong)]',
-          ].join(' ')}
-        />
+        <>
+          <span
+            aria-hidden="true"
+            className={[
+              'absolute top-1.5 right-1.5 size-1.5 rounded-full',
+              selecionado ? 'bg-white' : 'bg-[var(--color-accent-strong)]',
+            ].join(' ')}
+          />
+          <span className="sr-only">, com treino</span>
+        </>
       )}
     </button>
   )
