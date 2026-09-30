@@ -29,6 +29,8 @@ Exemplos com a massa atual:
 - `PUT /alunos/:id`
 - `DELETE /alunos/:id`
 
+Cadastrar ou atualizar aluno com `matricula` ou `email` ja existente devolve `409` ("Matricula ja cadastrada" ou "E-mail ja cadastrado").
+
 Payload base de aluno:
 
 ```json
@@ -42,6 +44,7 @@ Payload base de aluno:
 
 ### Professores
 
+- `POST /auth/professor/login` (corpo `{ "email", "senha" }`; devolve `{ id, nome, email }`; `401` com "E-mail ou senha invalidos")
 - `POST /professores`
 - `GET /professores`
 - `GET /professores/:id`

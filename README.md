@@ -148,6 +148,14 @@ Matriculas disponiveis para login:
 | 1009 | Isabela Martins |
 | 1010 | Joao Pedro Oliveira |
 
+Login de professor (e-mail e senha, apenas para desenvolvimento):
+
+| E-mail | Senha |
+|--------|-------|
+| joao.silva@academia.com | professor123 |
+
+A senha padrao vem de `backend/api/prisma/seed-senha.js` e pode ser trocada com a variavel `SEED_SENHA_PROFESSOR` antes de rodar a seed.
+
 ### Autenticacao transitoria do backend
 
 Os endpoints protegidos usam, por enquanto, estes headers:

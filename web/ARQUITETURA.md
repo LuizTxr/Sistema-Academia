@@ -35,23 +35,37 @@ web/src/
     providers/              # composicao dos providers globais
     router/                 # AppRouter, router, protected.route (guards)
   features/
-    auth/
+    auth/                   # login de aluno e de professor
       auth.dto.ts
       auth.service.ts
-      login.page.tsx
-      login.hook.ts
-    treino/
+      login-aluno.page.tsx
+      login-aluno.hook.ts
+      login-professor.page.tsx
+      login-professor.hook.ts
+    treino/                 # area do aluno: ver e marcar o treino
       treino.page.tsx
       treino.hook.ts
       treino.service.ts
       treino.dto.ts
       components/           # componentes exclusivos da feature
         exercicio.tsx
-        abas-dias-semana.tsx
+    alunos/                 # area do professor: lista, busca e cadastro de alunos
+      alunos.dto.ts
+      alunos.service.ts
+      alunos-lista.page.tsx
+      alunos-lista.hook.ts
+      aluno-cadastro.page.tsx
+      aluno-cadastro.hook.ts
+    gestao-treinos/         # area do professor: treinos de um aluno por dia da semana
+      gestao-treinos.page.tsx
+      gestao-treinos.hook.ts
+      gestao-treinos.service.ts
+      gestao-treinos.dto.ts
+      components/
   shared/                   # usado por duas ou mais features
-    components/             # UI generica (ex.: pagina-mobile.tsx)
+    components/             # UI generica: pagina-mobile, abas-dias-semana, campo, botao
     lib/                    # cliente-api.ts, armazenamento.ts, paths.ts (URLs das rotas)
-    sessao/                 # estado global da sessao do aluno (dto, service, hook, provider)
+    sessao/                 # sessao (aluno ou professor) usada por varias features (dto, service, hook, provider)
     styles/                 # theme.css, globals.css
   App.tsx
   main.tsx
@@ -116,7 +130,7 @@ page -> hook -> service -> dto
 
 - **Um hook por tela:** a pagina chama um unico hook (`useTreino`) que devolve tudo que a tela precisa, ja pronto para exibir. Se o arquivo crescer demais, dividir em hooks menores que o hook principal compoe.
 - **Regras puras** (ex.: "so pode marcar a proxima serie") ficam como funcoes puras exportadas no proprio `.hook.ts`, para poderem ser testadas sem React.
-- **Uma feature, varias paginas:** cada pagina tem seu par `<pagina>.page.tsx` e `<pagina>.hook.ts`. Servico e DTO sao compartilhados pela feature (`auth.service.ts` atende `login.page.tsx`).
+- **Uma feature, varias paginas:** cada pagina tem seu par `<pagina>.page.tsx` e `<pagina>.hook.ts`. Servico e DTO sao compartilhados pela feature (`auth.service.ts` atende `login-aluno.page.tsx` e `login-professor.page.tsx`).
 - **Provider e contexto:** quando ha estado global (ex.: sessao), o contexto e o hook de acesso ficam em `<nome>.hook.ts` e o componente em `<nome>.provider.tsx`. Se mais de uma feature usa esse estado, tudo isso mora em `shared/<nome>/`.
 - **Componentes** dentro de `components/` usam kebab-case e **nao** levam sufixo de papel (`exercicio.tsx`, `abas-dias-semana.tsx`).
 
@@ -298,9 +312,11 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 
 - Definidas em `app/router/`, nunca dentro das features. A feature so exporta a pagina.
 - As URLs ficam em `shared/lib/paths.ts` (usado por `app/` e pelas features); nenhuma string de rota solta em `navigate()` ou `<Link>`.
-- Prefixo por area: as rotas do aluno comecam com `/aluno` (`/aluno/login`, `/aluno/treino`). Uma area futura de professor usa `/professor`.
+- Prefixo por area: as rotas do aluno comecam com `/aluno` (`/aluno/login`, `/aluno/treino`). A area do professor usa `/professor` (`/professor/login`, `/professor/alunos`, `/professor/alunos/novo`, `/professor/alunos/:alunoId/treinos`).
 - Paginas carregadas com `lazy` no data router.
-- Autenticacao por layout route (`ProtectedRoute` e `GuestRoute`): a pagina nao precisa saber de sessao.
+- Autenticacao por layout route (`<ProtectedRoute papel="aluno" />`, `<ProtectedRoute papel="professor" />` e `GuestRoute`): a pagina nao precisa saber de sessao. Quem tenta abrir a area do outro papel e redirecionado para a propria.
+- A sessao guarda o `papel` (`aluno` ou `professor`). Paginas leem a sessao com `useSessaoAluno()` ou `useSessaoProfessor()`, que falham se o papel for outro.
+- Chamadas que exigem identidade de professor usam `requisicaoApi(caminho, { comoProfessor: true })`, que envia os headers transitorios `x-user-role` e `x-user-id`.
 
 ## 6. Checklist para criar uma pagina nova
 
