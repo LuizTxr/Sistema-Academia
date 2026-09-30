@@ -25,6 +25,7 @@ Os nomes do codigo (pastas, arquivos, componentes, funcoes, variaveis, tipos e p
 - Sem acentos e sem cedilha em nomes de codigo e de arquivo (`serie`, `acoes`, `cabecalho`).
 - O prefixo `use` dos hooks e obrigatorio do React e permanece: `useTreinoDoDia`, `useLogin`.
 - Os termos do dominio seguem o backend e o banco (`aluno`, `treino`, `exercicio`, `matricula`).
+- **Nomes que vem da API:** o DTO de resposta guarda os campos exatamente como o backend devolve (mesmo em ingles), e o servico converte para um modelo em portugues. A interface (hook, pagina e componentes) so enxerga o modelo em portugues. Exemplo: `SessaoAlunoResposta` (`enrollmentCode`) vira `SessaoAluno` (`matricula`).
 
 ## 2. Estrutura de pastas
 
@@ -37,8 +38,6 @@ web/src/
     auth/
       auth.dto.ts
       auth.service.ts
-      auth.hook.ts
-      auth.provider.tsx
       login.page.tsx
       login.hook.ts
     treino/
@@ -47,9 +46,12 @@ web/src/
       treino.service.ts
       treino.dto.ts
       components/           # componentes exclusivos da feature
+        exercicio.tsx
+        abas-dias-semana.tsx
   shared/                   # usado por duas ou mais features
-    components/             # UI generica (ex.: PaginaMobile)
-    lib/                    # cliente de API, storage generico
+    components/             # UI generica (ex.: pagina-mobile.tsx)
+    lib/                    # cliente-api.ts, armazenamento.ts (storage generico)
+    sessao/                 # estado global da sessao do aluno (dto, service, hook, provider)
     styles/                 # theme.css, globals.css
   App.tsx
   main.tsx
@@ -61,6 +63,13 @@ web/src/
 - A unica subpasta permitida dentro da feature e `components/`.
 - `shared/` so recebe o que ja e usado por duas ou mais features. Nao mover codigo para la antes da segunda necessidade.
 - Dependencias so em uma direcao: `app` -> `features` -> `shared`. `shared` nunca importa de uma feature, e uma feature nao importa de outra.
+- Estado global usado por varias features (ex.: a sessao do aluno) mora em `shared/<nome>/`, com os mesmos papeis de arquivo (`.dto`, `.service`, `.hook`, `.provider`). Assim a feature `treino` le a sessao sem importar da feature `auth`.
+
+### Imports
+
+- Entre pastas diferentes, usar o alias `@/` (aponta para `src/`): `@/shared/lib/cliente-api`, `@/features/treino/treino.page`.
+- Dentro da mesma pasta, usar caminho relativo: `./treino.dto`, `../treino.dto`.
+- O alias esta configurado em `vite.config.ts` (`resolve.alias`) e em `tsconfig.app.json` (`paths`). Ao mudar um, mudar o outro.
 
 ## 3. Estrutura de arquivos de uma pagina
 
@@ -86,10 +95,10 @@ page -> hook -> service -> dto
 
 ### Detalhes
 
-- **Mais de um hook por pagina:** o `.hook.ts` pode exportar varios hooks (`useDiasDeTreino`, `useProgressoDoTreino`). So dividir em arquivos separados quando o arquivo crescer demais.
-- **Regras puras** (ex.: "so pode marcar a proxima serie") ficam como funcoes puras ao lado do hook, para poderem ser testadas sem React.
+- **Um hook por tela:** a pagina chama um unico hook (`useTreino`) que devolve tudo que a tela precisa, ja pronto para exibir. Se o arquivo crescer demais, dividir em hooks menores que o hook principal compoe.
+- **Regras puras** (ex.: "so pode marcar a proxima serie") ficam como funcoes puras exportadas no proprio `.hook.ts`, para poderem ser testadas sem React.
 - **Uma feature, varias paginas:** cada pagina tem seu par `<pagina>.page.tsx` e `<pagina>.hook.ts`. Servico e DTO sao compartilhados pela feature (`auth.service.ts` atende `login.page.tsx`).
-- **Provider e contexto:** quando a feature expoe estado global (ex.: sessao), o contexto e o hook de acesso ficam em `<nome>.hook.ts` e o componente em `<nome>.provider.tsx`.
+- **Provider e contexto:** quando ha estado global (ex.: sessao), o contexto e o hook de acesso ficam em `<nome>.hook.ts` e o componente em `<nome>.provider.tsx`. Se mais de uma feature usa esse estado, tudo isso mora em `shared/<nome>/`.
 - **Componentes** dentro de `components/` usam kebab-case e **nao** levam sufixo de papel (`exercicio.tsx`, `abas-dias-semana.tsx`).
 
 ## 4. Componentes de interface: Compound Components
@@ -122,15 +131,23 @@ Cada variacao de layout vira uma prop nova (`mostrarNotas`, `compacto`, `esconde
 ### Com o padrao
 
 ```tsx
-<Exercicio.Root exercicio={exercicio} expandido={expandido} aoAlternar={aoAlternar}>
+<Exercicio.Root
+  exercicio={exercicio}
+  expandido={expandido}
+  concluido={concluido}
+  seriesConcluidas={seriesConcluidas}
+  aoAlternar={aoAlternar}
+>
   <Exercicio.Cabecalho />
-  <Exercicio.Series seriesConcluidas={seriesConcluidas} aoMarcarSerie={aoMarcarSerie} />
-  <Exercicio.Notas />
-  <Exercicio.Acoes aoConcluir={aoConcluirExercicio} />
+  <Exercicio.Corpo>
+    <Exercicio.Notas />
+    <Exercicio.Series aoAlternarSerie={aoAlternarSerie} />
+    <Exercicio.Acoes aoConcluir={aoConcluir} />
+  </Exercicio.Corpo>
 </Exercicio.Root>
 ```
 
-Quem usa escolhe quais partes aparecem e em que ordem. Para esconder as notas, basta nao renderizar `<Exercicio.Notas />`.
+Quem usa escolhe quais partes aparecem e em que ordem. Para esconder as notas, basta nao renderizar `<Exercicio.Notas />`. Exemplo real: `features/treino/components/exercicio.tsx`.
 
 ### Como implementar
 
@@ -210,6 +227,7 @@ O grupo e exportado como um objeto simples (`Exercicio = { Root, Cabecalho, ... 
 - Um subcomponente usado fora da raiz deve falhar com erro claro (como acima), nunca renderizar vazio em silencio.
 - Componentes do grupo ficam no mesmo arquivo enquanto forem pequenos. Se passar de ~150 linhas, virar uma pasta (`components/exercicio/`) com um arquivo por parte e um `index.ts`.
 - Estilo continua com Tailwind e tokens de `theme.css` (`bg-[var(--color-surface)]`), sem valores soltos.
+- Arquivos de compound components ficam em `components/` e exportam um objeto (`Exercicio = { Root, ... }`); por isso a regra `react-refresh/only-export-components` esta desligada para `src/**/components/**/*.tsx` em `eslint.config.js`. O unico efeito e o hot reload desses arquivos recarregar a pagina em vez de preservar estado.
 - A **logica** (o que acontece ao marcar uma serie) continua no `.hook.ts` da pagina. O componente recebe callbacks e so cuida da apresentacao.
 
 ### Padroes internos (em construcao)
@@ -279,7 +297,6 @@ Cada sugestao so vira "Definida" depois de aprovada e, de preferencia, depois de
 ## 7. Em aberto
 
 - Adotar TanStack Query ou manter hooks manuais para busca de dados.
-- Alias de import `@/` (por exemplo `@/shared/...`).
 - Regra de ESLint (`no-restricted-imports`) para impor a direcao das dependencias.
 - Estrategia de testes.
 - Aprovar as sugestoes de padroes internos dos compound components (secao 4).
