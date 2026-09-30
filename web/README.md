@@ -1,3 +1,9 @@
+# Frontend (web)
+
+As regras de arquitetura deste projeto (idioma, pastas, arquivos por pagina, compound components e rotas) estao em [ARQUITETURA.md](ARQUITETURA.md).
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
