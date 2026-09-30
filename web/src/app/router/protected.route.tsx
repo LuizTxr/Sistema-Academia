@@ -1,15 +1,15 @@
 import { Navigate, Outlet } from 'react-router'
-import { useAuth } from '../../features/auth/auth.hook'
+import { useSessao } from '@/shared/sessao/sessao.hook'
 import { paths } from './paths'
 
 export function ProtectedRoute() {
-  const { session } = useAuth()
+  const { sessao } = useSessao()
 
-  return session ? <Outlet /> : <Navigate to={paths.aluno.login} replace />
+  return sessao ? <Outlet /> : <Navigate to={paths.aluno.login} replace />
 }
 
 export function GuestRoute() {
-  const { session } = useAuth()
+  const { sessao } = useSessao()
 
-  return session ? <Navigate to={paths.aluno.treino} replace /> : <Outlet />
+  return sessao ? <Navigate to={paths.aluno.treino} replace /> : <Outlet />
 }

@@ -1,54 +1,54 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { paths } from '../../app/router/paths'
-import { useAuth } from './auth.hook'
-import { loginStudent } from './auth.service'
+import { paths } from '@/app/router/paths'
+import { useSessao } from '@/shared/sessao/sessao.hook'
+import { entrarAluno } from './auth.service'
 
 export function useLogin() {
-  const { signIn } = useAuth()
+  const { entrar } = useSessao()
   const navigate = useNavigate()
-  const [enrollmentCode, setEnrollmentCode] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [matricula, setMatricula] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
 
-  function changeEnrollmentCode(value: string) {
-    setEnrollmentCode(value.replace(/\D/g, ''))
+  function alterarMatricula(valor: string) {
+    setMatricula(valor.replace(/\D/g, ''))
 
-    if (errorMessage) {
-      setErrorMessage('')
+    if (mensagemErro) {
+      setMensagemErro('')
     }
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function enviar(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
 
-    const normalizedCode = enrollmentCode.trim()
+    const matriculaNormalizada = matricula.trim()
 
-    if (!normalizedCode) {
-      setErrorMessage('Informe sua matricula para entrar.')
+    if (!matriculaNormalizada) {
+      setMensagemErro('Informe sua matricula para entrar.')
       return
     }
 
-    setIsSubmitting(true)
+    setEnviando(true)
 
     try {
-      const student = await loginStudent(normalizedCode)
-      signIn(student)
+      const sessao = await entrarAluno(matriculaNormalizada)
+      entrar(sessao)
       navigate(paths.aluno.treino, { replace: true })
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Nao foi possivel entrar.',
+    } catch (erro) {
+      setMensagemErro(
+        erro instanceof Error ? erro.message : 'Nao foi possivel entrar.',
       )
-      setIsSubmitting(false)
+      setEnviando(false)
     }
   }
 
   return {
-    enrollmentCode,
-    errorMessage,
-    isSubmitting,
-    changeEnrollmentCode,
-    submit,
+    matricula,
+    mensagemErro,
+    enviando,
+    alterarMatricula,
+    enviar,
   }
 }

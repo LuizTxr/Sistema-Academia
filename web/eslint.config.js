@@ -20,4 +20,10 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Compound components exportam um objeto (ex.: Exercicio = { Root, ... }),
+    // o que a regra de fast refresh nao aceita.
+    files: ['src/**/components/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

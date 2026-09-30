@@ -10,7 +10,7 @@ export const router = createBrowserRouter([
       {
         path: paths.aluno.login,
         lazy: async () => ({
-          Component: (await import('../../features/auth/login.page')).LoginPage,
+          Component: (await import('@/features/auth/login.page')).LoginPage,
         }),
       },
     ],
@@ -21,9 +21,7 @@ export const router = createBrowserRouter([
       {
         path: paths.aluno.treino,
         lazy: async () => ({
-          Component: (
-            await import('../../features/workout/pages/WorkoutPage')
-          ).WorkoutPage,
+          Component: (await import('@/features/treino/treino.page')).TreinoPage,
         }),
       },
     ],
