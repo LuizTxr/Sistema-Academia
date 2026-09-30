@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
-import type { SessaoAluno } from './sessao.dto'
+import type { Sessao } from './sessao.dto'
 
 export type SessaoContextoValor = {
-  sessao: SessaoAluno | null
-  entrar: (sessao: SessaoAluno) => void
+  sessao: Sessao | null
+  entrar: (sessao: Sessao) => void
   sair: () => void
 }
 
@@ -19,11 +19,21 @@ export function useSessao() {
   return contexto
 }
 
-export function useSessaoAtiva() {
+export function useSessaoAluno() {
   const { sessao, sair } = useSessao()
 
-  if (!sessao) {
-    throw new Error('useSessaoAtiva exige um aluno com sessao iniciada.')
+  if (sessao?.papel !== 'aluno') {
+    throw new Error('useSessaoAluno exige um aluno com sessao iniciada.')
+  }
+
+  return { sessao, sair }
+}
+
+export function useSessaoProfessor() {
+  const { sessao, sair } = useSessao()
+
+  if (sessao?.papel !== 'professor') {
+    throw new Error('useSessaoProfessor exige um professor com sessao iniciada.')
   }
 
   return { sessao, sair }

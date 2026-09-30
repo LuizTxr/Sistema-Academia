@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSessaoAtiva } from '@/shared/sessao/sessao.hook'
+import { useSessaoAluno } from '@/shared/sessao/sessao.hook'
 import type {
   DiaTreino,
   ExercicioTreino,
@@ -123,7 +123,7 @@ export function concluirExercicio(
 }
 
 export function useTreino() {
-  const { sessao, sair: sairDaSessao } = useSessaoAtiva()
+  const { sessao, sair: sairDaSessao } = useSessaoAluno()
   const { matricula } = sessao
 
   const [dias, setDias] = useState<DiaTreino[]>([])

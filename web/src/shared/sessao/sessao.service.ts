@@ -1,13 +1,20 @@
 import { gravarJson, lerJson, removerItem } from '@/shared/lib/armazenamento'
-import type { SessaoAluno } from './sessao.dto'
+import type { Sessao } from './sessao.dto'
 
-const chaveSessao = 'sessao-aluno'
+const chaveSessao = 'sessao'
 
 export function lerSessao() {
-  return lerJson<SessaoAluno>(chaveSessao)
+  const sessao = lerJson<Sessao>(chaveSessao)
+
+  if (sessao?.papel !== 'aluno' && sessao?.papel !== 'professor') {
+    removerItem(chaveSessao)
+    return null
+  }
+
+  return sessao
 }
 
-export function gravarSessao(sessao: SessaoAluno) {
+export function gravarSessao(sessao: Sessao) {
   gravarJson(chaveSessao, sessao)
 }
 

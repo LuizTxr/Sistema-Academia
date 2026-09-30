@@ -38,3 +38,32 @@
 
   --tracking-tight: -0.03em;
 }
+
+:root {
+  --gradiente-acento: linear-gradient(
+    135deg,
+    var(--color-accent-strong),
+    var(--color-accent-strong)
+  );
+  --fundo-painel: none;
+}
+
+[data-tema='professor'] {
+  --color-canvas: #f1edfa;
+  --color-surface: #fcfbff;
+  --color-border-soft: #ddd5ef;
+  --color-text-strong: #251a45;
+  --color-text-base: #4a3f70;
+  --color-text-muted: #7a6d99;
+  --color-accent-strong: #6a4bc4;
+  --color-accent-soft: #ebe4fa;
+  --gradiente-acento: linear-gradient(135deg, #8a63e0 0%, #5b3fb0 100%);
+  --fundo-painel: linear-gradient(180deg, #f1ecfc 0%, #fcfbff 45%);
+  --shadow-card: 0 18px 40px -24px rgba(53, 34, 110, 0.35);
+}
+
+html:has([data-tema='professor']) {
+  background:
+    radial-gradient(circle at top, rgba(226, 214, 250, 0.9), transparent 45%),
+    #f3f0fa;
+}

@@ -1,6 +1,5 @@
 import { createContext, useContext } from 'react'
 import type { PropsWithChildren } from 'react'
-import type { DiaTreino } from '../treino.dto'
 
 type AbasDiasSemanaContextoValor = {
   diaSelecionadoId: string
@@ -34,7 +33,12 @@ function AbasDiasSemanaRoot({
 }
 
 type AbasDiasSemanaAbaProps = {
-  dia: DiaTreino
+  dia: {
+    id: string
+    rotulo: string
+    ativo: boolean
+    marcado?: boolean
+  }
 }
 
 function AbasDiasSemanaAba({ dia }: AbasDiasSemanaAbaProps) {
@@ -45,9 +49,10 @@ function AbasDiasSemanaAba({ dia }: AbasDiasSemanaAbaProps) {
     <button
       type="button"
       disabled={!dia.ativo}
+      aria-pressed={selecionado}
       onClick={() => aoSelecionar(dia.id)}
       className={[
-        'h-11 rounded-[var(--radius-card)] border text-sm font-semibold transition',
+        'relative h-11 rounded-[var(--radius-card)] border text-sm font-semibold transition',
         selecionado
           ? 'border-[var(--color-accent-strong)] bg-[var(--color-accent-strong)] text-white shadow-[var(--shadow-card)]'
           : 'border-[var(--color-border-soft)] bg-white text-[var(--color-text-strong)] shadow-[0_8px_18px_-16px_rgba(24,49,42,0.35)]',
@@ -57,6 +62,15 @@ function AbasDiasSemanaAba({ dia }: AbasDiasSemanaAbaProps) {
       ].join(' ')}
     >
       {dia.rotulo}
+      {dia.marcado && (
+        <span
+          aria-label="com treino"
+          className={[
+            'absolute top-1.5 right-1.5 size-1.5 rounded-full',
+            selecionado ? 'bg-white' : 'bg-[var(--color-accent-strong)]',
+          ].join(' ')}
+        />
+      )}
     </button>
   )
 }

@@ -1,5 +1,5 @@
 import { PaginaMobile } from '@/shared/components/pagina-mobile'
-import { AbasDiasSemana } from './components/abas-dias-semana'
+import { AbasDiasSemana } from '@/shared/components/abas-dias-semana'
 import { Exercicio } from './components/exercicio'
 import { useTreino } from './treino.hook'
 

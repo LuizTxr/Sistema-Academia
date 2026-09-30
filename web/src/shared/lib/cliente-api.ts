@@ -1,3 +1,5 @@
+import { lerSessao } from '@/shared/sessao/sessao.service'
+
 export const clienteApi = {
   urlBase: import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000',
 }
@@ -12,16 +14,35 @@ export class ErroApi extends Error {
   }
 }
 
+type OpcoesRequisicao = RequestInit & {
+  // Envia a identidade transitoria do professor (headers x-user-role e x-user-id).
+  comoProfessor?: boolean
+}
+
+function montarHeadersDeIdentidade() {
+  const sessao = lerSessao()
+
+  if (sessao?.papel !== 'professor') {
+    throw new ErroApi('Sessao de professor nao encontrada. Entre novamente.', 401)
+  }
+
+  return {
+    'x-user-role': 'professor',
+    'x-user-id': String(sessao.id),
+  }
+}
+
 export async function requisicaoApi<T>(
   caminho: string,
-  init?: RequestInit,
+  { comoProfessor, headers, ...init }: OpcoesRequisicao = {},
 ): Promise<T> {
   const resposta = await fetch(`${clienteApi.urlBase}${caminho}`, {
+    ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
+      ...(comoProfessor ? montarHeadersDeIdentidade() : {}),
+      ...(headers ?? {}),
     },
-    ...init,
   })
 
   if (!resposta.ok) {
@@ -41,5 +62,7 @@ export async function requisicaoApi<T>(
     throw new ErroApi(mensagem, resposta.status)
   }
 
-  return resposta.json() as Promise<T>
+  const texto = await resposta.text()
+
+  return (texto ? JSON.parse(texto) : undefined) as T
 }

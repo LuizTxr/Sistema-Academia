@@ -1,9 +1,11 @@
+import { LinkTexto } from '@/shared/components/link-texto'
 import { PaginaMobile } from '@/shared/components/pagina-mobile'
-import { useLogin } from './login.hook'
+import { paths } from '@/shared/lib/paths'
+import { useLoginAluno } from './login-aluno.hook'
 
-export function LoginPage() {
+export function LoginAlunoPage() {
   const { matricula, mensagemErro, enviando, alterarMatricula, enviar } =
-    useLogin()
+    useLoginAluno()
 
   return (
     <PaginaMobile.Root>
@@ -53,6 +55,10 @@ export function LoginPage() {
               {enviando ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
+
+          <LinkTexto to={paths.professor.login}>
+            Acesse login de professores
+          </LinkTexto>
         </div>
       </PaginaMobile.Corpo>
     </PaginaMobile.Root>

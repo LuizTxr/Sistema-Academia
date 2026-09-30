@@ -4,3 +4,9 @@ export type SessaoAlunoResposta = {
   studentName: string
   studentGoal: string
 }
+
+export type SessaoProfessorResposta = {
+  id: number
+  nome: string
+  email: string
+}

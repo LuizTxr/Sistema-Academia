@@ -5,7 +5,7 @@ import { paths } from '@/shared/lib/paths'
 import { useSessao } from '@/shared/sessao/sessao.hook'
 import { entrarAluno } from './auth.service'
 
-export function useLogin() {
+export function useLoginAluno() {
   const { entrar } = useSessao()
   const navigate = useNavigate()
   const [matricula, setMatricula] = useState('')
