@@ -154,9 +154,26 @@ export function useTreino() {
       .map((serie) => serie.id),
     expandido: exercicioExpandidoId === exercicio.id,
   }))
-  const treinoConcluido =
+
+  const treinoConcluido = 
     exercicios.length > 0 && exercicios.every((item) => item.concluido)
-  const temAlteracoesPendentes =
+
+  const totalSeries = exerciciosDoDia.reduce(
+    (total, exercicio) => total + exercicio.series.length,
+    0,
+  )
+
+  const seriesConcluidasTotal = exercicios.reduce(
+    (total, item) => total + item.seriesConcluidas.length,
+    0,
+  )
+
+  const progressoPercentual = 
+    totalSeries > 0
+    ? Math.round((seriesConcluidasTotal / totalSeries) * 100)
+    : 0
+
+  const temAlteracoesPendentes = 
     JSON.stringify(rascunho) !== JSON.stringify(progressoSalvo)
 
   useEffect(() => {
@@ -276,6 +293,9 @@ export function useTreino() {
     diaSelecionadoId,
     exercicios,
     treinoConcluido,
+    totalSeries,
+    seriesConcluidasTotal,
+    progressoPercentual,
     temAlteracoesPendentes,
     salvoEm,
     carregando,
