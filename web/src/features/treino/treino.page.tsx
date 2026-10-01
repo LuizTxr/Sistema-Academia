@@ -11,6 +11,9 @@ export function TreinoPage() {
     diaSelecionadoId,
     exercicios,
     treinoConcluido,
+    totalSeries,
+    seriesConcluidasTotal,
+    progressoPercentual,
     temAlteracoesPendentes,
     salvoEm,
     carregando,
@@ -86,7 +89,23 @@ export function TreinoPage() {
                     )}
                   </div>
                 </header>
+                
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+                    <span>
+                      {seriesConcluidasTotal} de {totalSeries} séries concluídas
+                    </span>
+                    <span>{progressoPercentual}%</span>
+                  </div>
 
+                  <div className="h-2 overflow-hidden rounded-full bg-[var(--color-border-soft)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--color-accent-strong)] transition-all duration-300"
+                      style={{ width: `${progressoPercentual}%` }}
+                    />
+                  </div>
+                </div>
+     
                 <div className="grid gap-3">
                   {exercicios.map(
                     ({ exercicio, concluido, seriesConcluidas, expandido }) => (
