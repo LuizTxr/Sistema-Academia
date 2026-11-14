@@ -31,5 +31,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-console.log(process.env.DATABASE_URL);
