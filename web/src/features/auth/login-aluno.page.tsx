@@ -11,12 +11,13 @@ export function LoginAlunoPage() {
     <PaginaMobile.Root>
       <PaginaMobile.Corpo>
         <div className="relative flex min-h-[calc(100svh-7rem)] flex-col justify-center gap-8">
-          <p className="absolute top-0 left-0 right-0 text-center text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Sistema Academia
-          </p>
+          <img
+            src="/logo-no-treino.png"
+            alt="No Treino - Gestão de Treinos"
+            className="absolute top-0 left-1/2 w-36 -translate-x-1/2 object-contain"
+          />
 
           <header className="grid gap-2 text-center">
-            <p className="sr-only">Sistema Academia</p>
             <h1 className="text-3xl font-semibold tracking-[var(--tracking-tight)] text-[var(--color-text-strong)]">
               Login
             </h1>
